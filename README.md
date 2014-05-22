@@ -136,6 +136,37 @@ Expects `key` to string and `value` to json.
 chord.leave();
 ```
 
+## Chord monitor
+Chord monitor visualizes actual behavior of a Chord network.
+
+To use, open `chord-monitor.html` by a WebRTC enabled browser.
+
+First, create a new node by clicking the "Create node" button and
+then click the "Create network" button. If cnnection to the PeerServer 
+succeed, the peer ID of the node is displayed above the button.
+
+Then, create another node by clicking "Create node" button and 
+copy the peer ID of the first node and paste it into the textbox at the left 
+side of the "Join network" button which is at the second node's space.
+If joining the network the first node created succeed, the peer ID of the 
+second node and statuses of each node are displayed.
+
+
+Now the two nodes are connected, then try inserting an entry.
+
+Input a key and value into textboxes at the left side of an "Insert" button 
+(the first or second node's one, either is ok) and click it. If insertion 
+succeed, the entry is displayed both of the nodes's spaces 
+(inserted entries are replicated to the near nodes for redundancy).
+
+The entries which have been inserted can be retrieved or removed by 
+"Retrieve" or "Remove" buttons.
+
+You can increase nodes by "Create node" button, and obsearve behavior of a Chord 
+network.
+
+Enjoy.
+
 ## References
 * I. Stoica, et al, [Chord: A scalable peer-to-peer lookup service for internet applications](http://dl.acm.org/citation.cfm?id=383071), 2001
 * [Open Chord](http://open-chord.sourceforge.net/)
