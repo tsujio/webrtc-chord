@@ -64,7 +64,11 @@
       html.find("#btn-insert-entry").click(function() {
         var key = html.find("#text-insert-entry-key").val();
         var value = html.find("#text-insert-entry-value").val();
-        chord.insert(key, JSON.parse(value), function(inserted) {
+        try {
+          value = JSON.parse(value);
+        } catch (e) {
+        }
+        chord.insert(key, value, function(inserted) {
           if (!inserted) {
             console.log("Failed to insert entry.");
           }
@@ -85,7 +89,11 @@
       html.find("#btn-remove-entry").click(function() {
         var key = html.find("#text-remove-entry-key").val();
         var value = html.find("#text-remove-entry-value").val();
-        chord.remove(key, JSON.parse(value), function(removed) {
+        try {
+          value = JSON.parse(value);
+        } catch (e) {
+        }
+        chord.remove(key, value, function(removed) {
           if (!removed) {
             console.log("Failed to remove entry.");
           }
