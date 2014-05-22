@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <script type="text/javascript" src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+    <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>
+    <script type="text/javascript" src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/sha256.js"></script>
+    <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/peerjs/0.3.7/peer.min.js"></script>
+    <script type="text/javascript" src="./dist/webrtc-chord.js"></script>
+
+    <script type="text/javascript" src="./chord-monitor.js"></script>
+  </head>
+  <body>
+    <button type="button" id="btn-create-node">Create node</button>
+
+    <hr />
+
+    <div id="node-list-container"></div>
+
+    <script type="text/template" id="node-template">
+      <div>
+        <p id="peer-id"></p>
+        <button type="button" id="btn-create">Create network</button><br />
+        <input type="text" id="text-id-to-join" /><button type="button" id="btn-join">Join network</button><br />
+        <button type="button" id="btn-leave">Leave network</button><br />
+        Key: <input type="text" id="text-insert-entry-key" /> Value: <input type="text" id="text-insert-entry-value" />
+        <button type="button" id="btn-insert-entry">Insert</button><br />
+        Key: <input type="text" id="text-retrieve-entry-key" />
+        <button type="button" id="btn-retrieve-entry">Retrieve</button>Value: <p id="p-retrieve-entry-value"><p/>
+        Key: <input type="text" id="text-remove-entry-key" />Value: <input type="text" id="text-remove-entry-value" />
+        <button type="button" id="btn-remove-entry">Remove</button>
+        <p>Successors</p>
+        <div id="successors-container"></div>
+        <p>Predecessor</p>
+        <div id="predecessor-container"></div>
+        <p>Finger Table</p>
+        <div id="finger-table-container"></div>
+        <p>Entries</p>
+        <div id="entries-container"></div>
+        <hr />
+      </div>
+    </script>
+  </body>
+</html>
