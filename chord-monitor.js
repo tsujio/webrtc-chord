@@ -2,7 +2,7 @@
   $(function() {
     var chords = {};
     var canvas = $("#canvas-chord");
-    var width = canvas.width(), height = canvas.height(), r = height / 2 - 10;
+    var width = canvas.width(), height = canvas.height(), r = height / 2 - 50;
 
     var calculateCoordinates = function(nodeId) {
       var bytes = _(Math.floor(_.size(nodeId) / 2)).times(function(i) {
