@@ -29,18 +29,16 @@
       ctx.stroke();
 
       _.each(chords, function(chord) {
-        if (!_.isNull(peerIdToShow) && chord.getPeerId() !== peerIdToShow) {
-          return;
-        }
-
-        var statuses = chord.getStatuses();
-
         ctx.beginPath();
         var coord = calculateCoordinates(chord.getNodeId());
         ctx.arc(coord.x, coord.y, 5, 0, 2 * Math.PI);
         ctx.stroke();
         ctx.fillStyle = 'red';
         ctx.fill();
+
+        if (!_.isNull(peerIdToShow) && chord.getPeerId() !== peerIdToShow) {
+          return;
+        }
 
         var strokeQuadraticCurve = function(toNode, rOffset, color) {
           var _coord = calculateCoordinates(toNode.nodeId);
@@ -54,6 +52,8 @@
           ctx.strokeStyle = color;
           ctx.stroke();
         };
+
+        var statuses = chord.getStatuses();
 
         if ($("#checkbox-show-successors").prop('checked')) {
           _.each(statuses.successors, function(successor) {
