@@ -131,10 +131,14 @@ define(['underscore', 'Utils'], function(_, Utils) {
       }));
     },
 
+    getStatus: function() {
+      return _.invoke(this._successors, 'toNodeInfo');
+    },
+
     toString: function() {
-      return _.map(this._successors, function(node, index) {
+      return "[Successors]\n" + _.map(this._successors, function(node, index) {
         return "[" + index + "] " + node.toString();
-      }).join("\n");
+      }).join("\n") + "\n";
     }
   };
 

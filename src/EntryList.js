@@ -94,10 +94,24 @@ define(['underscore', 'ID', 'Utils'], function(_, ID, Utils) {
       return _.size(this._entries);
     },
 
+    getStatus: function() {
+      return _.chain(this._entries)
+        .map(function(entries, key) {
+          return [
+            key,
+            _.map(entries, function(entry) {
+              return entry.value;
+            })
+          ];
+        })
+        .object()
+        .value();
+    },
+
     toString: function() {
       var self = this;
 
-      return _.chain(this._entries)
+      return "[Entries]\n" + _.chain(this._entries)
         .keys()
         .map(function(key) { return ID.fromHexString(key); })
         .sort(function(a, b) { return a.compareTo(b); })
@@ -108,7 +122,7 @@ define(['underscore', 'ID', 'Utils'], function(_, ID, Utils) {
             }).join("\n") + "\n";
         })
         .value()
-        .join("\n");
+        .join("\n") + "\n";
     }
   };
 

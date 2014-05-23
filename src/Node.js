@@ -319,6 +319,10 @@ define(['underscore', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Reques
       this._connectionFactory.removeConnection(this._peerId);
     },
 
+    getPeerId: function() {
+      return this._peerId;
+    },
+
     toNodeInfo: function() {
       return {
         nodeId: this.nodeId.toHexString(),

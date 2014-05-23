@@ -162,10 +162,18 @@ define(['underscore', 'FingerTable', 'SuccessorList'], function(_, FingerTable, 
 
     getStatuses: function() {
       return {
-        successors: this._successors.toString(),
-        fingerTable: this._fingerTable.toString(),
-        predecessor: _.isNull(this.getPredecessor()) ? "" : this.getPredecessor().toString()
+        successors: this._successors.getStatus(),
+        fingerTable: this._fingerTable.getStatus(),
+        predecessor: _.isNull(this.getPredecessor()) ? null : this.getPredecessor().toNodeInfo()
       };
+    },
+
+    toString: function() {
+      return [
+        this._successors.toString(),
+        "[Predecessor]\n" + (_.isNull(this.getPredecessor()) ? "" : this.getPredecessor().toString()) + "\n",
+        this._fingerTable.toString()
+      ].join("\n") + "\n";
     }
   };
 

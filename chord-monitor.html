@@ -9,9 +9,24 @@
     <script type="text/javascript" src="./dist/webrtc-chord.js"></script>
 
     <script type="text/javascript" src="./chord-monitor.js"></script>
+
+    <style>
+     #canvas-chord {
+       background-color: #FFF;
+       border: 1px solid black;
+     }
+    </style>
   </head>
   <body>
     <button type="button" id="btn-create-node">Create node</button>
+
+    <hr />
+
+    <canvas id="canvas-chord" width="600" height="400"></canvas><br />
+    Successors: <input type="checkbox" id="checkbox-show-successors" checked="checked">
+    Predecessor: <input type="checkbox" id="checkbox-show-predecessor" checked="checked">
+    FingerTable: <input type="checkbox" id="checkbox-show-fingertable" checked="checked"><br />
+    Clicked node info: <p id="p-node-info"></p>
 
     <hr />
 
@@ -20,6 +35,7 @@
     <script type="text/template" id="node-template">
       <div>
         <p id="peer-id"></p>
+        <p id="node-id"></p>
         <button type="button" id="btn-create">Create network</button><br />
         <input type="text" id="text-id-to-join" /><button type="button" id="btn-join">Join network</button><br />
         <button type="button" id="btn-leave">Leave network</button><br />
@@ -28,15 +44,8 @@
         Key: <input type="text" id="text-retrieve-entry-key" />
         <button type="button" id="btn-retrieve-entry">Retrieve</button>Value: <p id="p-retrieve-entry-value"><p/>
         Key: <input type="text" id="text-remove-entry-key" />Value: <input type="text" id="text-remove-entry-value" />
-        <button type="button" id="btn-remove-entry">Remove</button>
-        <p>Successors</p>
-        <div id="successors-container"></div>
-        <p>Predecessor</p>
-        <div id="predecessor-container"></div>
-        <p>Finger Table</p>
-        <div id="finger-table-container"></div>
-        <p>Entries</p>
-        <div id="entries-container"></div>
+        <button type="button" id="btn-remove-entry">Remove</button><br />
+        <div id="node-status-container"></div>
         <hr />
       </div>
     </script>

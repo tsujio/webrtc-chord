@@ -163,10 +163,17 @@ define(['underscore'], function(_) {
       });
     },
 
+    getStatus: function() {
+      var self = this;
+      return _(this._localId.getLength()).times(function(i) {
+        return _.isNull(self._getEntry(i)) ? null : self._getEntry(i).toNodeInfo();
+      });
+    },
+
     toString: function() {
       var self = this;
 
-      return _.chain(this._remoteNodes)
+      return "[FingerTable]\n" + _.chain(this._remoteNodes)
         .keys()
         .map(function(key) { return parseInt(key); })
         .sortBy()
@@ -197,7 +204,7 @@ define(['underscore'], function(_) {
         })
         .reject(function(str) { return str === ""; })
         .value()
-        .join("\n");
+        .join("\n") + "\n";
     }
   };
 

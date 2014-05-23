@@ -112,6 +112,22 @@ define(['underscore', 'LocalNode', 'Utils'], function(_, LocalNode, Utils) {
       }
 
       return this._localNode.getPeerId();
+    },
+
+    getNodeId: function() {
+      if (_.isNull(this._localNode)) {
+        return null;
+      }
+
+      return this._localNode.nodeId.toHexString();
+    },
+
+    toString: function() {
+      if (_.isNull(this._localNode)) {
+        return "";
+      }
+
+      return this._localNode.toDisplayString();
     }
   };
 

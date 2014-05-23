@@ -314,7 +314,7 @@ define([
 
     getStatuses: function() {
       var ret = this._references.getStatuses();
-      ret['entries'] = this._entries.toString();
+      ret['entries'] = this._entries.getStatus();
       return ret;
     },
 
@@ -338,6 +338,13 @@ define([
 
     toString: function() {
       return this.nodeId.toHexString() + " (" + this._peerId + ")";
+    },
+
+    toDisplayString: function() {
+      return [
+        this._references.toString(),
+        this._entries.toString()
+      ].join("\n") + "\n";
     }
   };
 
