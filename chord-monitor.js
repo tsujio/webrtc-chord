@@ -3,6 +3,7 @@
     var chords = {};
     var canvas = $("#canvas-chord");
     var width = canvas.width(), height = canvas.height(), r = height / 2 - 50;
+    var center = {x: width / 2, y: height / 2};
 
     var calculateCoordinates = function(nodeId) {
       var bytes = _(Math.floor(_.size(nodeId) / 2)).times(function(i) {
@@ -14,8 +15,8 @@
         .value();
       var radian = ratio * 2 * Math.PI;
       return {
-        x: width / 2 - r * Math.cos(radian),
-        y: height / 2 - r * Math.sin(radian)
+        x: center.x - r * Math.cos(radian),
+        y: center.y - r * Math.sin(radian)
       };
     };
 
@@ -24,7 +25,7 @@
       var ctx = canvas[0].getContext('2d');
       ctx.clearRect(0, 0, width, height);
       ctx.beginPath();
-      ctx.arc(width / 2, height / 2, r, 0, 2 * Math.PI);
+      ctx.arc(center.x, center.y, r, 0, 2 * Math.PI);
       ctx.strokeStyle = 'gray';
       ctx.stroke();
 
@@ -42,15 +43,27 @@
 
         var strokeQuadraticCurve = function(toNode, rOffset, color) {
           var _coord = calculateCoordinates(toNode.nodeId);
-          var radian = Math.atan2((_coord.y + coord.y) / 2 - height / 2,
-                                  (_coord.x + coord.x) / 2 - width / 2);
+          var radian = Math.atan2((_coord.y + coord.y) / 2 - center.y,
+                                  (_coord.x + coord.x) / 2 - center.x);
           ctx.beginPath();
           ctx.moveTo(coord.x, coord.y);
-          ctx.quadraticCurveTo(width / 2 + (r + rOffset) * Math.cos(radian),
-                               height / 2 + (r + rOffset) * Math.sin(radian),
-                               _coord.x, _coord.y);
+          var cpx = center.x + (r + rOffset) * Math.cos(radian);
+          var cpy = center.y + (r + rOffset) * Math.sin(radian);
+          ctx.quadraticCurveTo(cpx, cpy, _coord.x, _coord.y);
           ctx.strokeStyle = color;
           ctx.stroke();
+
+          ctx.beginPath();
+          ctx.moveTo(_coord.x, _coord.y);
+          var radian = Math.atan2(cpy - _coord.y,
+                                  cpx - _coord.x);
+          ctx.lineTo(_coord.x + 10 * Math.cos(radian - Math.PI / 6),
+                     _coord.y + 10 * Math.sin(radian - Math.PI / 6));
+          ctx.lineTo(_coord.x + 10 * Math.cos(radian + Math.PI / 6),
+                     _coord.y + 10 * Math.sin(radian + Math.PI / 6));
+          ctx.closePath();
+          ctx.fillStyle = color;
+          ctx.fill();
         };
 
         var statuses = chord.getStatuses();
