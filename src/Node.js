@@ -8,10 +8,6 @@ define(['underscore', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Reques
         config.requestTimeout < 0) {
       config.requestTimeout = 180000;
     }
-    if (!Utils.isValidNumber(config.silentConnectionCloseTimeout) ||
-        config.silentConnectionCloseTimeout < 0) {
-      config.silentConnectionCloseTimeout = 30000;
-    }
 
     this._peerId = nodeInfo.peerId;
     this.nodeId = ID.create(nodeInfo.peerId);
@@ -243,9 +239,6 @@ define(['underscore', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Reques
           });
         }
 
-        connection.onRequestReceived = self._makeOnRequestReceivedListener(connection);
-        connection.onResponseRecieved = self._makeOnResponseReceivedListener(connection);
-
         try {
           connection.send(request);
         } finally {
@@ -254,65 +247,30 @@ define(['underscore', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Reques
       });
     },
 
-    onConnection: function(connection) {
+    onRequestReceived: function(request) {
       var self = this;
 
-      var timer = setTimeout(function() {
-        connection.close();
-      }, this._config.silentConnectionCloseTimeout);
+      this._requestHandler.handle(request, function(response) {
+        self._connectionFactory.create(self._peerId, function(connection) {
+          if (_.isNull(connection)) {
+            return;
+          }
 
-      connection.onRequestReceived = function(request) {
-        clearTimeout(timer);
-
-        self._makeOnRequestReceivedListener(connection)(request);
-      };
-
-      connection.onResponseRecieved = connection.onResponseReceived = function(response) {
-        clearTimeout(timer);
-
-        self._makeOnResponseReceivedListener(connection)(response);
-      };
-    },
-
-    _makeOnRequestReceivedListener: function(connection) {
-      var self = this;
-
-      return function(request) {
-        connection.close();
-
-        self._requestHandler.handle(request, function(response) {
-          self._connectionFactory.create(self._peerId, function(connection) {
-            if (_.isNull(connection)) {
-              return;
-            }
-
-            try {
-              connection.send(response);
-            } finally {
-              connection.close();
-            }
-          });
+          try {
+            connection.send(response);
+          } finally {
+            connection.close();
+          }
         });
-      };
+      });
     },
 
-    _makeOnResponseReceivedListener: function(connection) {
-      var self = this;
-
-      return function(response) {
-        connection.close();
-
-        if (_.has(self._callbacks, response.requestId)) {
-          var callback = self._callbacks[response.requestId];
-          delete self._callbacks[response.requestId];
-          callback(response);
-        }
-      };
-    },
-
-    isUnused: function() {
-      return (!_.isEmpty(this._callbacks) ||
-              this._connectionFactory.isConnectionCached(this._peerId));
+    onResponseReceived: function(response) {
+      if (_.has(this._callbacks, response.requestId)) {
+        var callback = this._callbacks[response.requestId];
+        delete this._callbacks[response.requestId];
+        callback(response);
+      }
     },
 
     disconnect: function() {
