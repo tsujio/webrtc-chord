@@ -40,6 +40,8 @@ define(['underscore', 'Utils'], function(_, Utils) {
           _.chain(successors)
             .reject(function(s) {
               return (s.equals(successor) ||
+                      (!_.isNull(self._references.getPredecessor()) &&
+                       s.equals(self._references.getPredecessor())) ||
                       _.some(references, function(r) { return r.equals(s); }));
             })
             .each(function(s) {
@@ -49,6 +51,15 @@ define(['underscore', 'Utils'], function(_, Utils) {
           _.each(references, function(ref) {
             self._references.addReference(ref);
           });
+
+          var currentSuccessor = self._references.getSuccessor();
+          if (!currentSuccessor.equals(successor)) {
+            currentSuccessor.ping(function(isAlive) {
+              if (!isAlive) {
+                self._references.removeReference(currentSuccessor);
+              }
+            });
+          }
         };
 
         if (_.size(references) > 0 && !_.isNull(references[0])) {
