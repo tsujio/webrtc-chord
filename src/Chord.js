@@ -26,7 +26,14 @@ define(['underscore', 'LocalNode', 'Utils'], function(_, LocalNode, Utils) {
         }
 
         self._localNode = localNode;
-        self._localNode.create(callback);
+        self._localNode.create(function(peerId) {
+          if (_.isNull(peerId)) {
+            self.leave();
+            self._localNode = null;
+          }
+
+          callback(peerId);
+        });
       });
     },
 
@@ -50,7 +57,14 @@ define(['underscore', 'LocalNode', 'Utils'], function(_, LocalNode, Utils) {
         }
 
         self._localNode = localNode;
-        self._localNode.join(bootstrapId, callback);
+        self._localNode.join(bootstrapId, function(peerId) {
+          if (_.isNull(peerId)) {
+            self.leave();
+            self._localNode = null;
+          }
+
+          callback(peerId);
+        });
       });
     },
 
