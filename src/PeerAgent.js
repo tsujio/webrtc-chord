@@ -66,6 +66,10 @@ define(['underscore', 'peerjs', 'Utils'], function(_, Peer, Utils) {
       var self = this;
 
       var conn = this._peer.connect(peerId);
+      if (!conn) {
+        this._callbacks.onConnectionOpened(peerId, null);
+        return;
+      }
 
       this._waitingTimer = setTimeout(function() {
         if (!self.isWaitingOpeningConnection()) {
