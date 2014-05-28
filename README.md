@@ -1,22 +1,22 @@
 webrtc-chord
 ============
 
-An implementation of Chord, a kind of Distributed Hash Table, using WebRTC.
+An implementation of Chord, a protocol of Distributed Hash Table, using WebRTC.
 
 ## Requirements
-webrtc-chord uses [WebRTC](http://www.webrtc.org/) as transports, so check your
+webrtc-chord requires [WebRTC](http://www.webrtc.org/), so check if your
 browser supports WebRTC.
 
 It also uses [PeerJS](https://github.com/peers/peerjs) library, which
-simplifies use of WebRTC.
-PeerJS needs [PeerServer](https://github.com/peers/peerjs-server) as signaling
-server, so you must run your own PeerServer or use cloud service like 
+simplifies the use of WebRTC.
+PeerJS needs [PeerServer](https://github.com/peers/peerjs-server) (to act) as signaling
+server, so you must run your own PeerServer or use cloud services such as
 [PeerServer Cloud](http://peerjs.com/peerserver) or 
-[SkyWay](http://nttcom.github.io/skyway/en/). The information of PeerServer 
-must be passed to chord object as parameter of the constructor.
+[SkyWay](http://nttcom.github.io/skyway/en/). A Chord object receives the information 
+for connecting to the PeerServer via a parameter of the constructor.
 
 WebRTC and PeerJS uses STUN/TURN server and PeerServer, so you may need
-some proxy settings to access to them.
+to adjust some proxy settings to access to them.
 
 ## Include libraries
 webrtc-chord depends on the following libraries.
@@ -128,7 +128,7 @@ chord.retrieve(key, function(entries) {
 // Remove entry
 chord.remove(key, value);
 ```
-Expects `key` to string and `value` to json.
+Expect `key` to be a string value type and `value` to be a JSON data type.
 
 ## Leave network
 ```javascript
