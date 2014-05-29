@@ -6,6 +6,8 @@ define(['underscore', 'LocalNode', 'Utils'], function(_, LocalNode, Utils) {
 
     this._config = config;
     this._localNode = null;
+    this.onentriesinserted = function(entries) { ; };
+    this.onentriesremoved = function(entries) { ; };
   };
 
   Chord.prototype = {
@@ -19,7 +21,7 @@ define(['underscore', 'LocalNode', 'Utils'], function(_, LocalNode, Utils) {
         callback = function() { ; };
       }
 
-      LocalNode.create(this._config, function(localNode) {
+      LocalNode.create(this, this._config, function(localNode) {
         if (_.isNull(localNode)) {
           callback(null);
           return;
@@ -50,7 +52,7 @@ define(['underscore', 'LocalNode', 'Utils'], function(_, LocalNode, Utils) {
         callback = function() { ; };
       }
 
-      LocalNode.create(this._config, function(localNode) {
+      LocalNode.create(this, this._config, function(localNode) {
         if (_.isNull(localNode)) {
           callback(null);
           return;

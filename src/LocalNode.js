@@ -4,7 +4,8 @@ define([
 ], function(
   _, NodeFactory, EntryList, Entry, ReferenceList, ID, StabilizeTask, FixFingerTask, CheckPredecessorTask, Utils
 ) {
-  var LocalNode = function(config) {
+  var LocalNode = function(chord, config) {
+    this._chord = chord;
     this._config = config;
     this.nodeId = null;
     this._peerId = null;
@@ -14,8 +15,8 @@ define([
     this._references = null;
   };
 
-  LocalNode.create = function(config, callback) {
-    var localNode = new LocalNode(config);
+  LocalNode.create = function(chord, config, callback) {
+    var localNode = new LocalNode(chord, config);
     NodeFactory.create(localNode, config, function(peerId, factory) {
       if (!Utils.isNonemptyString(peerId)) {
         callback(null);
@@ -113,6 +114,10 @@ define([
             });
 
             self._entries.addAll(entries);
+
+            _.defer(function() {
+              self._chord.onentriesinserted(_.invoke(entries, 'toJson'));
+            });
 
             self._createTasks();
 
@@ -255,20 +260,39 @@ define([
     },
 
     insertReplicas: function(replicas) {
+      var self = this;
+
       this._entries.addAll(replicas);
+
+      _.defer(function() {
+        self._chord.onentriesinserted(_.invoke(replicas, 'toJson'));
+      });
     },
 
     removeReplicas: function(sendingNodeId, replicas) {
+      var self = this;
+
       if (_.size(replicas) !== 0) {
         this._entries.removeAll(replicas);
+
+        _.defer(function() {
+          self._chord.onentriesremoved(_.invoke(replicas, 'toJson'));
+        });
+
         return;
       }
 
       var allReplicasToRemove = this._entries.getEntriesInInterval(this.nodeId, sendingNodeId);
       this._entries.removeAll(allReplicasToRemove);
+
+      _.defer(function() {
+        self._chord.onentriesremoved(_.invoke(allReplicasToRemove, 'toJson'));
+      });
     },
 
     insertEntry: function(entry, callback) {
+      var self = this;
+
       if (!_.isNull(this._references.getPredecessor()) &&
           !entry.id.isInInterval(this._references.getPredecessor().nodeId, this.nodeId)) {
         this._references.getPredecessor().insertEntry(entry, callback); 
@@ -276,6 +300,10 @@ define([
       }
 
       this._entries.add(entry);
+
+      _.defer(function() {
+        self._chord.onentriesinserted([entry.toJson()]);
+      });
 
       _.each(this._references.getSuccessors(), function(successor) {
         successor.insertReplicas([entry]);
@@ -304,6 +332,10 @@ define([
       }
 
       this._entries.remove(entry);
+
+      _.defer(function() {
+        self._chord.onentriesremoved([entry.toJson()]);
+      });
 
       _.each(this._references.getSuccessors(), function(successor) {
         successor.removeReplicas(self.nodeId, [entry]);

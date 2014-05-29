@@ -130,6 +130,19 @@ chord.remove(key, value);
 ```
 Expect `key` to be a string value type and `value` to be a JSON data type.
 
+You can detect insertion/removal of entries into/from your node as the following.
+```javascript
+// Invoked when entries are inserted into your node
+chord.onentriesinserted = function(insertedEntries) {
+  console.log(insertedEntries.length + " entries were inserted.");
+};
+
+// Invoked when entries are removed from your node
+chord.onentriesremoved = function(removedEntries) {
+  console.log(removedEntries.length + " entries were removed.");
+};
+```
+
 ## Leave network
 ```javascript
 // Leave chord network
