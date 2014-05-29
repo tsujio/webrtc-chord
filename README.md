@@ -18,6 +18,21 @@ for connecting to the PeerServer via a parameter of the constructor.
 WebRTC and PeerJS uses STUN/TURN server and PeerServer, so you may need
 to adjust some proxy settings to access to them.
 
+## Build
+Linux
+```sh
+npm install -g requirejs
+cd webrtc-chord
+r.js -o bin/build.js
+```
+
+Windows
+```bat
+npm install -g requirejs
+cd webrtc-chord
+r.js.cmd -o bin\build.js
+```
+
 ## Include libraries
 webrtc-chord depends on the following libraries.
 * [underscore.js](http://underscorejs.org/)
@@ -152,31 +167,10 @@ chord.leave();
 ## Chord monitor
 Chord monitor visualizes actual behavior of a Chord network.
 
-To use, open `chord-monitor.html` by a WebRTC enabled browser.
+Open `chord-monitor.html` by a WebRTC enabled browser to start monitoring.
 
-First, create a new node by clicking the "Create node" button and
-then click the "Create network" button. If cnnection to the PeerServer 
-succeed, the peer ID of the node is displayed above the button.
-
-Then, create another node by clicking "Create node" button and 
-copy the peer ID of the first node and paste it into the textbox at the left 
-side of the "Join network" button which is at the second node's space.
-If joining the network the first node created succeed, the peer ID of the 
-second node and statuses of each node are displayed.
-
-
-Now the two nodes are connected, then try inserting an entry.
-
-Input a key and value into textboxes at the left side of an "Insert" button 
-(the first or second node's one, either is ok) and click it. If insertion 
-succeed, the entry is displayed both of the nodes's spaces 
-(inserted entries are replicated to the near nodes for redundancy).
-
-The entries which have been inserted can be retrieved or removed by 
-"Retrieve" or "Remove" buttons.
-
-You can increase nodes by "Create node" button, and obsearve behavior of a Chord 
-network.
+You can create nodes by clicking "Create node" button and connect them by "Join network"
+button.
 
 Enjoy.
 
