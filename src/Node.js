@@ -215,6 +215,8 @@ define(['underscore', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Reques
 
         if (!_.isUndefined(callbacks)) {
           var timer = setTimeout(function() {
+            console.log(method + " request to " + self._peerId + " timed out.");
+
             if (_.has(self._callbacks, request.requestId)) {
               var callback = self._callbacks[request.requestId];
               delete self._callbacks[request.requestId];

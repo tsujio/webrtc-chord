@@ -76,6 +76,8 @@ define(['underscore', 'peerjs', 'Utils'], function(_, Peer, Utils) {
           return;
         }
 
+        console.log("Opening connection to " + peerId + " timed out.");
+
         self._waitingTimer = null;
 
         self._callbacks.onConnectionOpened(peerId, null);
