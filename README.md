@@ -12,7 +12,9 @@ simplifies the use of WebRTC.
 PeerJS needs [PeerServer](https://github.com/peers/peerjs-server) (to act) as signaling
 server, so you must run your own PeerServer or use cloud services such as
 [PeerServer Cloud](http://peerjs.com/peerserver) or 
-[SkyWay](http://nttcom.github.io/skyway/en/). A Chord object receives the information 
+[SkyWay](http://nttcom.github.io/skyway/en/) (Centralization problem caused by PeerServer
+is discussed in [Issue 2](https://github.com/tsujio/webrtc-chord/issues/2)).
+A Chord object receives the information 
 for connecting to the PeerServer via a parameter of the constructor.
 
 WebRTC and PeerJS uses STUN/TURN server and PeerServer, so you may need
