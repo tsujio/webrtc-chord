@@ -147,22 +147,24 @@ define(['underscore', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Reques
         entry: entry.toJson()
       }, {
         success: function(result) {
-          callback(true);
+          callback();
         },
 
         error: function(error) {
-          callback(false, error);
+          callback(error);
         }
       });
     },
 
     retrieveEntries: function(id, callback) {
+      var self = this;
+
       this._sendRequest('RETRIEVE_ENTRIES', {
         id: id.toHexString()
       }, {
         success: function(result) {
           if (!_.isArray(result.entries)) {
-            callback(null);
+            callback(null, new Error("Received invalid data from " + self._peerId));
             return;
           }
 
@@ -190,11 +192,11 @@ define(['underscore', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Reques
         entry: entry.toJson()
       }, {
         success: function(result) {
-          callback(true);
+          callback();
         },
 
         error: function(error) {
-          callback(false, error);
+          callback(error);
         }
       });
     },

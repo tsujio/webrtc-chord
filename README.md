@@ -125,25 +125,25 @@ chord.join(bootstrapId, function(myPeerId) {
 Then, you can insert/retrieve/remove entries.
 ```javascript
 // Insert entry
-chord.insert(key, value, function(inserted) {
-  if (!inserted) {
-    console.log("Failed to insert entry.");
-  } else {
-    console.log("The entry has been inserted.");
+chord.insert(key, value, function(error) {
+  if (error) {
+    console.log("Failed to insert entry: " + error);
   }
 });
 
-// Retrieve entry
-chord.retrieve(key, function(entries) {
-  if (entries === null) {
-    console.log("Failed to retrieve entries.");
-  } else {
-    console.log("Retrieved entries: " + entries.toString());
+// Retrieve entries
+chord.retrieve(key, function(entries, error) {
+  if (error) {
+    console.log("Failed to retrieve entries: " + error);
   }
 });
 
 // Remove entry
-chord.remove(key, value);
+chord.remove(key, value, function(error) {
+  if (error) {
+    console.log("Failed to remove entry: " + error);
+  }
+});
 ```
 Expect `key` to be a string value type and `value` to be a JSON data type.
 

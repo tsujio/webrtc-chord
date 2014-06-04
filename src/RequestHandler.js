@@ -16,8 +16,9 @@ define(['underscore', 'ID', 'Response', 'Entry', 'Utils'], function(_, ID, Respo
         }
 
         var key = ID.fromHexString(request.params.key);
-        this._localNode.findSuccessor(key, function(successor) {
-          if (_.isNull(successor)) {
+        this._localNode.findSuccessor(key, function(successor, error) {
+          if (error) {
+            console.log(error);
             self._sendFailureResponse(request, callback);
             return;
           }

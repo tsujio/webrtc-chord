@@ -87,7 +87,7 @@ define(['underscore', 'LocalNode', 'Utils'], function(_, LocalNode, Utils) {
         callback = function() { ; };
       }
       if (!Utils.isNonemptyString(key) || _.isUndefined(value)) {
-        callback(false);
+        callback(new Error("Invalid arguments."));
         return;
       }
 
@@ -99,7 +99,7 @@ define(['underscore', 'LocalNode', 'Utils'], function(_, LocalNode, Utils) {
         callback = function() { ; };
       }
       if (!Utils.isNonemptyString(key)) {
-        callback(null);
+        callback(new Error("Invalid argument."));
         return;
       }
 
@@ -111,7 +111,7 @@ define(['underscore', 'LocalNode', 'Utils'], function(_, LocalNode, Utils) {
         callback = function() { ; };
       }
       if (!Utils.isNonemptyString(key) || _.isUndefined(value)) {
-        callback(false);
+        callback(new Error("Invalid arguments."));
         return;
       }
 

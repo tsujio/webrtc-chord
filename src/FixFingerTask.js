@@ -25,7 +25,11 @@ define(['underscore', 'Utils'], function(_, Utils) {
 
       var nextFingerToFix = _.random(this._localNode.nodeId.getLength() - 1);
       var lookForID = this._localNode.nodeId.addPowerOfTwo(nextFingerToFix);
-      this._localNode.findSuccessor(lookForID, function(successor) {
+      this._localNode.findSuccessor(lookForID, function(successor, error) {
+        if (error) {
+          console.log(error);
+        }
+
         if (!_.isNull(successor) &&
             !self._references.containsReference(successor)) {
           self._references.addReference(successor);

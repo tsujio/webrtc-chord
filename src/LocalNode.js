@@ -149,12 +149,12 @@ define([
       try {
         entry = new Entry(id, value);
       } catch (e) {
-        callback(false);
+        callback(e);
         return;
       }
-      this.findSuccessor(id, function(successor) {
-        if (_.isNull(successor)) {
-          callback(false);
+      this.findSuccessor(id, function(successor, error) {
+        if (error) {
+          callback(error);
           return;
         }
 
@@ -164,9 +164,9 @@ define([
 
     retrieve: function(key, callback) {
       var id = ID.create(key);
-      this.findSuccessor(id, function(successor) {
-        if (_.isNull(successor)) {
-          callback(null);
+      this.findSuccessor(id, function(successor, error) {
+        if (error) {
+          callback(null, error);
           return;
         }
 
@@ -187,12 +187,12 @@ define([
       try {
         entry = new Entry(id, value);
       } catch (e) {
-        callback(false);
+        callback(e);
         return;
       }
-      this.findSuccessor(id, function(successor) {
-        if (_.isNull(successor)) {
-          callback(false);
+      this.findSuccessor(id, function(successor, error) {
+        if (error) {
+          callback(error);
           return;
         }
 
@@ -204,7 +204,7 @@ define([
       var self = this;
 
       if (_.isNull(key)) {
-        callback(null);
+        callback(null, new Error("Invalid argument."));
       }
 
       var successor = this._references.getSuccessor();

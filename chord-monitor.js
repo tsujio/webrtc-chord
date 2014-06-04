@@ -201,21 +201,21 @@
           value = JSON.parse(value);
         } catch (e) {
         }
-        chord.insert(key, value, function(inserted) {
-          if (!inserted) {
-            console.log("Failed to insert entry.");
+        chord.insert(key, value, function(error) {
+          if (error) {
+            console.log("Failed to insert entry: " + error);
           }
         });
       });
 
       html.find("#btn-retrieve-entry").click(function() {
         var key = html.find("#text-retrieve-entry-key").val();
-        chord.retrieve(key, function(value) {
-          if (_.isNull(value)) {
-            console.log("Failed to retrieve entries.");
+        chord.retrieve(key, function(values, error) {
+          if (error) {
+            console.log("Failed to retrieve entries: " + error);
             return;
           }
-          html.find("#p-retrieve-entry-value").text(JSON.stringify(value));
+          html.find("#p-retrieve-entry-value").text(JSON.stringify(values));
         });
       });
 
@@ -226,9 +226,9 @@
           value = JSON.parse(value);
         } catch (e) {
         }
-        chord.remove(key, value, function(removed) {
-          if (!removed) {
-            console.log("Failed to remove entry.");
+        chord.remove(key, value, function(error) {
+          if (error) {
+            console.log("Failed to remove entry: " + error);
           }
         });
       });
