@@ -21,20 +21,20 @@ define(['underscore', 'LocalNode', 'Utils'], function(_, LocalNode, Utils) {
         callback = function() { ; };
       }
 
-      LocalNode.create(this, this._config, function(localNode) {
-        if (_.isNull(localNode)) {
-          callback(null);
+      LocalNode.create(this, this._config, function(localNode, error) {
+        if (error) {
+          callback(null, error);
           return;
         }
 
         self._localNode = localNode;
-        self._localNode.create(function(peerId) {
-          if (_.isNull(peerId)) {
+        self._localNode.create(function(peerId, error) {
+          if (error) {
             self.leave();
             self._localNode = null;
           }
 
-          callback(peerId);
+          callback(peerId, error);
         });
       });
     },
@@ -52,20 +52,20 @@ define(['underscore', 'LocalNode', 'Utils'], function(_, LocalNode, Utils) {
         callback = function() { ; };
       }
 
-      LocalNode.create(this, this._config, function(localNode) {
-        if (_.isNull(localNode)) {
-          callback(null);
+      LocalNode.create(this, this._config, function(localNode, error) {
+        if (error) {
+          callback(null, error);
           return;
         }
 
         self._localNode = localNode;
-        self._localNode.join(bootstrapId, function(peerId) {
-          if (_.isNull(peerId)) {
+        self._localNode.join(bootstrapId, function(peerId, error) {
+          if (error) {
             self.leave();
             self._localNode = null;
           }
 
-          callback(peerId);
+          callback(peerId, error);
         });
       });
     },

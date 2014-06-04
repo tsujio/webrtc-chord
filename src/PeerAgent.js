@@ -42,7 +42,6 @@ define(['underscore', 'peerjs', 'Utils'], function(_, Peer, Utils) {
     });
 
     this._peer.on('error', function(error) {
-      console.log(error);
       var match = error.message.match(/Could not connect to peer (\w+)/);
       if (match) {
         if (!self.isWaitingOpeningConnection()) {
@@ -53,11 +52,12 @@ define(['underscore', 'peerjs', 'Utils'], function(_, Peer, Utils) {
         self._waitingTimer = null;
 
         var peerId = match[1];
-        callbacks.onConnectionOpened(peerId, null);
+        callbacks.onConnectionOpened(peerId, null, error);
         return;
       }
 
-      onPeerSetup(null);
+      console.log(error);
+      onPeerSetup(null, error);
     });
   };
 
@@ -67,7 +67,8 @@ define(['underscore', 'peerjs', 'Utils'], function(_, Peer, Utils) {
 
       var conn = this._peer.connect(peerId);
       if (!conn) {
-        this._callbacks.onConnectionOpened(peerId, null);
+        var error = new Error("Failed to open connection to " + peerId + ".");
+        this._callbacks.onConnectionOpened(peerId, null, error);
         return;
       }
 
@@ -76,11 +77,10 @@ define(['underscore', 'peerjs', 'Utils'], function(_, Peer, Utils) {
           return;
         }
 
-        console.log("Opening connection to " + peerId + " timed out.");
-
         self._waitingTimer = null;
 
-        self._callbacks.onConnectionOpened(peerId, null);
+        var error = new Error("Opening connection to " + peerId + " timed out.");
+        self._callbacks.onConnectionOpened(peerId, null, error);
       }, this._config.connectionOpenTimeout);
 
       conn.on('open', function() {
@@ -102,6 +102,10 @@ define(['underscore', 'peerjs', 'Utils'], function(_, Peer, Utils) {
 
     destroy: function() {
       this._peer.destroy();
+    },
+
+    getPeerId: function() {
+      return this._peer.id;
     }
   };
 

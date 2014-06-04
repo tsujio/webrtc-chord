@@ -17,9 +17,9 @@ define([
 
   LocalNode.create = function(chord, config, callback) {
     var localNode = new LocalNode(chord, config);
-    NodeFactory.create(localNode, config, function(peerId, factory) {
-      if (!Utils.isNonemptyString(peerId)) {
-        callback(null);
+    NodeFactory.create(localNode, config, function(peerId, factory, error) {
+      if (error) {
+        callback(null, error);
         return;
       }
 
@@ -59,27 +59,27 @@ define([
     join: function(bootstrapId, callback) {
       var self = this;
 
-      this._nodeFactory.create({peerId: bootstrapId}, function(bootstrapNode) {
-        if (_.isNull(bootstrapNode)) {
-          callback(null);
+      this._nodeFactory.create({peerId: bootstrapId}, function(bootstrapNode, error) {
+        if (error) {
+          callback(null, error);
           return;
         }
 
         self._references.addReference(bootstrapNode);
 
-        bootstrapNode.findSuccessor(self.nodeId, function(successor) {
-          if (_.isNull(successor)) {
+        bootstrapNode.findSuccessor(self.nodeId, function(successor, error) {
+          if (error) {
             self._references.removeReference(bootstrapNode);
-            callback(null);
+            callback(null, error);
             return;
           }
 
           self._references.addReference(successor);
 
           var _notifyAndCopyEntries = function(node, callback) {
-            node.notifyAndCopyEntries(self, function(refs, entries) {
-              if (_.isNull(refs) || _.isNull(entries)) {
-                callback(null, null);
+            node.notifyAndCopyEntries(self, function(refs, entries, error) {
+              if (error) {
+                callback(null, null, error);
                 return;
               }
 
@@ -99,8 +99,9 @@ define([
               _notifyAndCopyEntries(refs[0], callback);
             });
           };
-          _notifyAndCopyEntries(successor, function(refs, entries) {
-            if (_.isNull(refs) || _.isNull(entries)) {
+          _notifyAndCopyEntries(successor, function(refs, entries, error) {
+            if (error) {
+              console.log(error);
               self._createTasks();
               callback(self._peerId);
               return;
@@ -169,9 +170,9 @@ define([
           return;
         }
 
-        successor.retrieveEntries(id, function(entries) {
-          if (_.isNull(entries)) {
-            callback(null);
+        successor.retrieveEntries(id, function(entries, error) {
+          if (error) {
+            callback(null, error);
             return;
           }
 
@@ -219,8 +220,9 @@ define([
       }
 
       var closestPrecedingNode = this._references.getClosestPrecedingNode(key);
-      closestPrecedingNode.findSuccessor(key, function(successor) {
-        if (_.isNull(successor)) {
+      closestPrecedingNode.findSuccessor(key, function(successor, error) {
+        if (error) {
+          console.log(error);
           self._references.removeReference(closestPrecedingNode);
           self.findSuccessor(key, callback);
           return;

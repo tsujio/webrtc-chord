@@ -3,13 +3,17 @@ define(['underscore', 'PeerAgent', 'Connection', 'Utils'], function(_, PeerAgent
     var self = this;
 
     this._peerAgent = new PeerAgent(config, {
-      onPeerSetup: function(peerId) {
-        callback(peerId, self);
+      onPeerSetup: function(peerId, error) {
+        if (error) {
+          callback(null, error);
+          return;
+        }
+        callback(self);
       },
 
-      onConnectionOpened: function(peerId, conn) {
-        if (_.isNull(conn)) {
-          self._invokeNextCallback(peerId, null);
+      onConnectionOpened: function(peerId, conn, error) {
+        if (error) {
+          self._invokeNextCallback(peerId, null, error);
           return;
         }
 
@@ -17,7 +21,11 @@ define(['underscore', 'PeerAgent', 'Connection', 'Utils'], function(_, PeerAgent
           requestReceived: function(request) {
             connection.close();
 
-            nodeFactory.create({peerId: connection.getPeerId()}, function(node) {
+            nodeFactory.create({peerId: connection.getPeerId()}, function(node, error) {
+              if (error) {
+                console.log(error);
+                return;
+              }
               node.onRequestReceived(request);
             });
           },
@@ -25,7 +33,11 @@ define(['underscore', 'PeerAgent', 'Connection', 'Utils'], function(_, PeerAgent
           responseReceived: function(response) {
             connection.close();
 
-            nodeFactory.create({peerId: connection.getPeerId()}, function(node) {
+            nodeFactory.create({peerId: connection.getPeerId()}, function(node, error) {
+              if (error) {
+                console.log(error);
+                return;
+              }
               node.onResponseReceived(response);
             });
           },
@@ -60,7 +72,11 @@ define(['underscore', 'PeerAgent', 'Connection', 'Utils'], function(_, PeerAgent
 
             connection.close();
 
-            nodeFactory.create({peerId: connection.getPeerId()}, function(node) {
+            nodeFactory.create({peerId: connection.getPeerId()}, function(node, error) {
+              if (error) {
+                console.log(error);
+                return;
+              }
               node.onRequestReceived(request);
             });
           },
@@ -70,7 +86,11 @@ define(['underscore', 'PeerAgent', 'Connection', 'Utils'], function(_, PeerAgent
 
             connection.close();
 
-            nodeFactory.create({peerId: connection.getPeerId()}, function(node) {
+            nodeFactory.create({peerId: connection.getPeerId()}, function(node, error) {
+              if (error) {
+                console.log(error);
+                return;
+              }
               node.onResponseReceived(response);
             });
           },
@@ -156,7 +176,7 @@ define(['underscore', 'PeerAgent', 'Connection', 'Utils'], function(_, PeerAgent
       this._peerAgent.connect(callbackInfo.peerId);
     },
 
-    _invokeNextCallback: function(peerId, connection) {
+    _invokeNextCallback: function(peerId, connection, error) {
       var self = this;
 
       _.defer(function() {
@@ -169,11 +189,10 @@ define(['underscore', 'PeerAgent', 'Connection', 'Utils'], function(_, PeerAgent
         return;
       }
       if (callbackInfo.peerId !== peerId) {
-        console.log("Unknown situation.");
-        callbackInfo.callback(null);
+        callbackInfo.callback(null, new Error("Unknown situation."));
         return;
       }
-      callbackInfo.callback(connection);
+      callbackInfo.callback(connection, error);
     },
 
     removeConnection: function(remotePeerId) {
@@ -188,6 +207,10 @@ define(['underscore', 'PeerAgent', 'Connection', 'Utils'], function(_, PeerAgent
     destroy: function() {
       this._peerAgent.destroy();
     },
+
+    getPeerId: function() {
+      return this._peerAgent.getPeerId();
+    }
   };
 
   return ConnectionFactory;

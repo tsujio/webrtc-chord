@@ -161,9 +161,9 @@
 
       var html = $(_.template($("#node-template").html())());
       html.find("#btn-create").click(function() {
-        chord.create(function(peerId) {
-          if (_.isNull(peerId)) {
-            console.log("Failed to create network.");
+        chord.create(function(peerId, error) {
+          if (error) {
+            console.log("Failed to create network: " + error);
             return;
           }
           html.find("#peer-id").text("Peer ID: " + peerId);
@@ -176,9 +176,9 @@
 
       html.find("#btn-join").click(function() {
         var id = html.find("#text-id-to-join").val();
-        chord.join(id, function(peerId) {
-          if (_.isNull(peerId)) {
-            console.log("Failed to join network.");
+        chord.join(id, function(peerId, error) {
+          if (error) {
+            console.log("Failed to join network: " + error);
             return;
           }
           html.find("#peer-id").text("Peer ID: " + peerId);

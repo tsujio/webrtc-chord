@@ -30,8 +30,9 @@ define(['underscore', 'Utils'], function(_, Utils) {
       }
       var successor = _.first(successors);
 
-      successor.notify(this._localNode, function(references) {
-        if (_.isNull(references)) {
+      successor.notify(this._localNode, function(references, error) {
+        if (error) {
+          console.log(error);
           self._references.removeReference(successor);
           return;
         }
@@ -54,8 +55,9 @@ define(['underscore', 'Utils'], function(_, Utils) {
 
           var currentSuccessor = self._references.getSuccessor();
           if (!currentSuccessor.equals(successor)) {
-            currentSuccessor.ping(function(isAlive) {
-              if (!isAlive) {
+            currentSuccessor.ping(function(isAlive, error) {
+              if (error) {
+                console.log(error);
                 self._references.removeReference(currentSuccessor);
               }
             });
@@ -64,8 +66,9 @@ define(['underscore', 'Utils'], function(_, Utils) {
 
         if (_.size(references) > 0 && !_.isNull(references[0])) {
           if (!self._localNode.equals(references[0])) {
-            successor.notifyAndCopyEntries(self._localNode, function(references, entries) {
-              if (_.isNull(references) || _.isNull(entries)) {
+            successor.notifyAndCopyEntries(self._localNode, function(references, entries, error) {
+              if (error) {
+                console.log(error);
                 return;
               }
 

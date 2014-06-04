@@ -45,8 +45,8 @@ define(['underscore', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Reques
           self._nodeFactory.create(nodeInfo, callback);
         },
 
-        error: function() {
-          callback(null);
+        error: function(error) {
+          callback(null, error);
         }
       });
     },
@@ -79,8 +79,8 @@ define(['underscore', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Reques
           });
         },
 
-        error: function() {
-          callback(null, null);
+        error: function(error) {
+          callback(null, null, error);
         }
       });
     },
@@ -102,8 +102,8 @@ define(['underscore', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Reques
           });
         },
 
-        error: function() {
-          callback(null);
+        error: function(error) {
+          callback(null, error);
         }
       });
     },
@@ -126,8 +126,8 @@ define(['underscore', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Reques
           callback(true);
         },
 
-        error: function() {
-          callback(false);
+        error: function(error) {
+          callback(false, error);
         }
       });
     },
@@ -151,8 +151,8 @@ define(['underscore', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Reques
           callback(true);
         },
 
-        error: function() {
-          callback(false);
+        error: function(error) {
+          callback(false, error);
         }
       });
     },
@@ -180,8 +180,8 @@ define(['underscore', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Reques
           callback(entries);
         },
 
-        error: function() {
-          callback(null);
+        error: function(error) {
+          callback(null, error);
         }
       });
     },
@@ -194,8 +194,8 @@ define(['underscore', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Reques
           callback(true);
         },
 
-        error: function() {
-          callback(false);
+        error: function(error) {
+          callback(false, error);
         }
       });
     },
@@ -203,10 +203,10 @@ define(['underscore', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Reques
     _sendRequest: function(method, params, callbacks) {
       var self = this;
 
-      this._connectionFactory.create(this._peerId, function(connection) {
-        if (_.isNull(connection)) {
+      this._connectionFactory.create(this._peerId, function(connection, error) {
+        if (error) {
           if (!_.isUndefined(callbacks)) {
-            callbacks.error();
+            callbacks.error(error);
           }
           return;
         }
@@ -215,25 +215,18 @@ define(['underscore', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Reques
 
         if (!_.isUndefined(callbacks)) {
           var timer = setTimeout(function() {
-            console.log(method + " request to " + self._peerId + " timed out.");
-
             if (_.has(self._callbacks, request.requestId)) {
               var callback = self._callbacks[request.requestId];
               delete self._callbacks[request.requestId];
-              callback(null);
+              callbacks.error(new Error(method + " request to " + self._peerId + " timed out."));
             }
           }, self._config.requestTimeout);
 
           self._callbacks[request.requestId] = _.once(function(response) {
             clearTimeout(timer);
 
-            if (_.isNull(response)) {
-              callbacks.error();
-              return;
-            }
-
             if (response.status !== 'SUCCESS') {
-              callbacks.error();
+              callbacks.error(new Error(response.result.message));
               return;
             }
 
@@ -253,8 +246,8 @@ define(['underscore', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Reques
       var self = this;
 
       this._requestHandler.handle(request, function(response) {
-        self._connectionFactory.create(self._peerId, function(connection) {
-          if (_.isNull(connection)) {
+        self._connectionFactory.create(self._peerId, function(connection, error) {
+          if (error) {
             return;
           }
 

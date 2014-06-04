@@ -30,8 +30,9 @@ define(['underscore', 'ID', 'Response', 'Entry', 'Utils'], function(_, ID, Respo
 
       case 'NOTIFY_AND_COPY':
         var potentialPredecessorNodeInfo = request.params.potentialPredecessorNodeInfo;
-        this._nodeFactory.create(potentialPredecessorNodeInfo, function(node) {
-          if (_.isNull(node)) {
+        this._nodeFactory.create(potentialPredecessorNodeInfo, function(node, error) {
+          if (error) {
+            console.log(error);
             this._sendFailureResponse(request, callback);
             return;
           }
@@ -52,8 +53,9 @@ define(['underscore', 'ID', 'Response', 'Entry', 'Utils'], function(_, ID, Respo
 
       case 'NOTIFY':
         var potentialPredecessorNodeInfo = request.params.potentialPredecessorNodeInfo;
-        this._nodeFactory.create(potentialPredecessorNodeInfo, function(node) {
-          if (_.isNull(node)) {
+        this._nodeFactory.create(potentialPredecessorNodeInfo, function(node, error) {
+          if (error) {
+            console.log(error);
             self._sendFailureResponse(request, callback);
             return;
           }
@@ -173,8 +175,9 @@ define(['underscore', 'ID', 'Response', 'Entry', 'Utils'], function(_, ID, Respo
 
       case 'LEAVES_NETWORK':
         var predecessorNodeInfo = request.params.predecessorNodeInfo;
-        this._nodeFactory.create(predecessorNodeInfo, function(predecessor) {
-          if (_.isNull(predecessor)) {
+        this._nodeFactory.create(predecessorNodeInfo, function(predecessor, error) {
+          if (error) {
+            console.log(error);
             return;
           }
 

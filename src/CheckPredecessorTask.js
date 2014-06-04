@@ -27,8 +27,9 @@ define(['underscore', 'Utils'], function(_, Utils) {
         return;
       }
 
-      predecessor.ping(function(isAlive) {
-        if (!isAlive) {
+      predecessor.ping(function(isAlive, error) {
+        if (error) {
+          console.log(error);
           self._references.removeReference(predecessor);
         }
       });

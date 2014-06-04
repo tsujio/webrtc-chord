@@ -21,15 +21,15 @@ define([
     }
 
     var nodeFactory = new NodeFactory(localNode, config);
-    ConnectionFactory.create(config, nodeFactory, function(peerId, connectionFactory) {
-      if (!Utils.isNonemptyString(peerId)) {
-        callback(null, null);
+    ConnectionFactory.create(config, nodeFactory, function(connectionFactory, error) {
+      if (error) {
+        callback(null, null, error);
         return;
       }
 
       nodeFactory._connectionFactory = connectionFactory;
 
-      callback(peerId, nodeFactory);
+      callback(connectionFactory.getPeerId(), nodeFactory);
     });
   };
 
@@ -38,7 +38,7 @@ define([
       var self = this;
 
       if (!Node.isValidNodeInfo(nodeInfo)) {
-        callback(null);
+        callback(null, new Error("Invalid node info."));
         return;
       }
 
@@ -60,11 +60,12 @@ define([
         callback([]);
         return;
       }
-      this.create(_.first(nodesInfo), function(node) {
+      this.create(_.first(nodesInfo), function(node, error) {
         self.createAll(_.rest(nodesInfo), function(nodes) {
-          if (!_.isNull(node)) {
+          if (!error) {
             callback([node].concat(nodes));
           } else {
+            console.log(error);
             callback(nodes);
           }
         });
