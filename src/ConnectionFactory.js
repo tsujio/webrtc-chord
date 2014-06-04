@@ -121,6 +121,10 @@ define(['underscore', 'PeerAgent', 'Connection', 'Utils'], function(_, PeerAgent
         return;
       }
 
+      if (this._peerAgent.isWaitingOpeningConnection()) {
+        return;
+      }
+
       if (this._connectionPool.has(callbackInfo.peerId)) {
         var connection = this._connectionPool.get(callbackInfo.peerId);
         if (connection.isAvailable()) {
@@ -129,10 +133,6 @@ define(['underscore', 'PeerAgent', 'Connection', 'Utils'], function(_, PeerAgent
         }
 
         this.removeConnection(connection.getPeerId());
-      }
-
-      if (this._peerAgent.isWaitingOpeningConnection()) {
-        return;
       }
 
       this._peerAgent.connect(callbackInfo.peerId);
