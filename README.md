@@ -99,9 +99,9 @@ var config = {
 After creating an instance, create a new chord network,
 ```javascript
 // Create a new chord network
-chord.create(function(myPeerId) {
-  if (myPeerId === null) {
-    console.log("Failed to create chord network.");
+chord.create(function(myPeerId, error) {
+  if (error) {
+    console.log("Failed to create chord network: " + error);
   } else {
     console.log("My peer ID: " + myPeerId);
   }
@@ -111,9 +111,9 @@ chord.create(function(myPeerId) {
 or join an existing one.
 ```javascript
 // Join an existing chord network
-chord.join(bootstrapId, function(myPeerId) {
-  if (myPeerId === null) {
-    console.log("Failed to join chord network.");
+chord.join(bootstrapId, function(myPeerId, error) {
+  if (error) {
+    console.log("Failed to join chord network: " + error);
   } else {
     console.log("My peer ID: " + myPeerId);
   }
