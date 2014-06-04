@@ -47,8 +47,7 @@ define([
         return;
       }
 
-      var node = new Node(nodeInfo, this, this._callbacks, this._connectionFactory,
-                          this._requestHandler, this._config);
+      var node = new Node(nodeInfo, this, this._connectionFactory, this._requestHandler, this._config);
 
       callback(node);
     },
@@ -70,6 +69,39 @@ define([
           }
         });
       });
+    },
+
+    onRequestReceived: function(peerId, request) {
+      this.create({peerId: peerId}, function(node, error) {
+        if (error) {
+          console.log(error);
+          return;
+        }
+        node.onRequestReceived(request);
+      });
+    },
+
+    onResponseReceived: function(peerId, response) {
+      this.create({peerId: peerId}, function(node, error) {
+        if (error) {
+          console.log(error);
+          return;
+        }
+        node.onResponseReceived(response);
+      });
+    },
+
+    registerCallback: function(key, callback) {
+      this._callbacks[key] = callback;
+    },
+
+    deregisterCallback: function(key) {
+      if (!_.has(this._callbacks, key)) {
+        return null;
+      }
+      var callback = this._callbacks[key];
+      delete this._callbacks[key];
+      return callback;
     },
 
     destroy: function() {

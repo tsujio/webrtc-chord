@@ -10,7 +10,7 @@ define(['underscore', 'Request', 'Response'], function(_, Request, Response) {
     });
 
     this._conn.on('close', function() {
-      callbacks.closedByRemote();
+      callbacks.closedByRemote(self);
     });
 
     this._conn.on('error', function(error) {
@@ -33,7 +33,7 @@ define(['underscore', 'Request', 'Response'], function(_, Request, Response) {
         } catch (e) {
           return;
         }
-        this._callbacks.responseReceived(response);
+        this._callbacks.responseReceived(this, response);
       } else if (Request.isRequest(data)) {
         var request;
         try {
@@ -41,12 +41,12 @@ define(['underscore', 'Request', 'Response'], function(_, Request, Response) {
         } catch (e) {
           return;
         }
-        this._callbacks.requestReceived(request);
+        this._callbacks.requestReceived(this, request);
       }
     },
 
     close: function() {
-      this._callbacks.closedByLocal();
+      this._callbacks.closedByLocal(this);
     },
 
     destroy: function() {

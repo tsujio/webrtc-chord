@@ -2,6 +2,20 @@ define(['underscore', 'PeerAgent', 'Connection', 'Utils'], function(_, PeerAgent
   var ConnectionFactory = function(config, nodeFactory, callback) {
     var self = this;
 
+    var requestReceived = function(connection, request) {
+      connection.close();
+      nodeFactory.onRequestReceived(connection.getPeerId(), request);
+    };
+    var responseReceived = function(connection, response) {
+      connection.close();
+      nodeFactory.onResponseReceived(connection.getPeerId(), response);
+    };
+    var closedByRemote = function(connection) {
+      self.removeConnection(connection.getPeerId());
+    };
+    var closedByLocal = function(connection) {
+      self._connectionPool.set(connection.getPeerId(), connection);
+    };
     this._peerAgent = new PeerAgent(config, {
       onPeerSetup: function(peerId, error) {
         if (error) {
@@ -18,37 +32,10 @@ define(['underscore', 'PeerAgent', 'Connection', 'Utils'], function(_, PeerAgent
         }
 
         var connection = new Connection(conn, {
-          requestReceived: function(request) {
-            connection.close();
-
-            nodeFactory.create({peerId: connection.getPeerId()}, function(node, error) {
-              if (error) {
-                console.log(error);
-                return;
-              }
-              node.onRequestReceived(request);
-            });
-          },
-
-          responseReceived: function(response) {
-            connection.close();
-
-            nodeFactory.create({peerId: connection.getPeerId()}, function(node, error) {
-              if (error) {
-                console.log(error);
-                return;
-              }
-              node.onResponseReceived(response);
-            });
-          },
-
-          closedByRemote: function() {
-            self.removeConnection(connection.getPeerId());
-          },
-
-          closedByLocal: function() {
-            self._connectionPool.set(connection.getPeerId(), connection);
-          }
+          requestReceived: requestReceived,
+          responseReceived: responseReceived,
+          closedByRemote: closedByRemote,
+          closedByLocal: closedByLocal
         });
 
         self._invokeNextCallback(peerId, connection);
@@ -67,41 +54,16 @@ define(['underscore', 'PeerAgent', 'Connection', 'Utils'], function(_, PeerAgent
         var clearTimerOnce = _.once(function() { clearTimeout(timer); });
 
         connection = new Connection(conn, {
-          requestReceived: function(request) {
+          requestReceived: function(connection, request) {
             clearTimerOnce();
-
-            connection.close();
-
-            nodeFactory.create({peerId: connection.getPeerId()}, function(node, error) {
-              if (error) {
-                console.log(error);
-                return;
-              }
-              node.onRequestReceived(request);
-            });
+            requestReceived(connection, request);
           },
-
-          responseReceived: function(response) {
+          responseReceived: function(connection, response) {
             clearTimerOnce();
-
-            connection.close();
-
-            nodeFactory.create({peerId: connection.getPeerId()}, function(node, error) {
-              if (error) {
-                console.log(error);
-                return;
-              }
-              node.onResponseReceived(response);
-            });
+            responseReceived(connection, response);
           },
-
-          closedByRemote: function() {
-            self.removeConnection(connection.getPeerId());
-          },
-
-          closedByLocal: function() {
-            self._connectionPool.set(connection.getPeerId(), connection);
-          }
+          closedByRemote: closedByRemote,
+          closedByLocal: closedByLocal
         });
       },
 

@@ -1,5 +1,5 @@
 define(['underscore', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Request, Entry, Utils) {
-  var Node = function(nodeInfo, nodeFactory, callbacks, connectionFactory, requestHandler, config) {
+  var Node = function(nodeInfo, nodeFactory, connectionFactory, requestHandler, config) {
     if (!Node.isValidNodeInfo(nodeInfo)) {
       throw new Error("Invalid arguments.");
     }
@@ -15,7 +15,6 @@ define(['underscore', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Reques
     this._connectionFactory = connectionFactory;
     this._requestHandler = requestHandler;
     this._config = config;
-    this._callbacks = callbacks;
   };
 
   Node.isValidNodeInfo = function(nodeInfo) {
@@ -215,14 +214,13 @@ define(['underscore', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Reques
 
         if (!_.isUndefined(callbacks)) {
           var timer = setTimeout(function() {
-            if (_.has(self._callbacks, request.requestId)) {
-              var callback = self._callbacks[request.requestId];
-              delete self._callbacks[request.requestId];
+            var callback = self._nodeFactory.deregisterCallback(request.requestId);
+            if (!_.isNull(callback)) {
               callbacks.error(new Error(method + " request to " + self._peerId + " timed out."));
             }
           }, self._config.requestTimeout);
 
-          self._callbacks[request.requestId] = _.once(function(response) {
+          self._nodeFactory.registerCallback(request.requestId, _.once(function(response) {
             clearTimeout(timer);
 
             if (response.status !== 'SUCCESS') {
@@ -231,7 +229,7 @@ define(['underscore', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Reques
             }
 
             callbacks.success(response.result);
-          });
+          }));
         }
 
         try {
@@ -261,9 +259,8 @@ define(['underscore', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Reques
     },
 
     onResponseReceived: function(response) {
-      if (_.has(this._callbacks, response.requestId)) {
-        var callback = this._callbacks[response.requestId];
-        delete this._callbacks[response.requestId];
+      var callback = this._nodeFactory.deregisterCallback(response.requestId);
+      if (!_.isNull(callback)) {
         callback(response);
       }
     },
