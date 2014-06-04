@@ -14,11 +14,11 @@ define(['underscore', 'LocalNode', 'Utils'], function(_, LocalNode, Utils) {
     create: function(callback) {
       var self = this;
 
-      if (!_.isNull(this._localNode)) {
+      if (this._localNode) {
         throw new Error("Local node is already created.");
       }
-      if (_.isUndefined(callback)) {
-        callback = function() { ; };
+      if (!callback) {
+        callback = function() {};
       }
 
       LocalNode.create(this, this._config, function(localNode, error) {
@@ -45,11 +45,11 @@ define(['underscore', 'LocalNode', 'Utils'], function(_, LocalNode, Utils) {
       if (!Utils.isNonemptyString(bootstrapId)) {
         throw new Error("Invalid argument.");
       }
-      if (!_.isNull(this._localNode)) {
+      if (this._localNode) {
         throw new Error("Local node is already created.");
       }
-      if (_.isUndefined(callback)) {
-        callback = function() { ; };
+      if (!callback) {
+        callback = function() {};
       }
 
       LocalNode.create(this, this._config, function(localNode, error) {
@@ -73,7 +73,7 @@ define(['underscore', 'LocalNode', 'Utils'], function(_, LocalNode, Utils) {
     leave: function() {
       var self = this;
 
-      if (_.isNull(this._localNode)) {
+      if (!this._localNode) {
         return;
       }
 
@@ -83,8 +83,12 @@ define(['underscore', 'LocalNode', 'Utils'], function(_, LocalNode, Utils) {
     },
 
     insert: function(key, value, callback) {
-      if (_.isUndefined(callback)) {
-        callback = function() { ; };
+      if (!callback) {
+        callback = function() {};
+      }
+      if (!this._localNode) {
+        callback(new Error("Create or join network at first."));
+        return;
       }
       if (!Utils.isNonemptyString(key) || _.isUndefined(value)) {
         callback(new Error("Invalid arguments."));
@@ -95,8 +99,12 @@ define(['underscore', 'LocalNode', 'Utils'], function(_, LocalNode, Utils) {
     },
 
     retrieve: function(key, callback) {
-      if (_.isUndefined(callback)) {
-        callback = function() { ; };
+      if (!callback) {
+        callback = function() {};
+      }
+      if (!this._localNode) {
+        callback(new Error("Create or join network at first."));
+        return;
       }
       if (!Utils.isNonemptyString(key)) {
         callback(new Error("Invalid argument."));
@@ -107,8 +115,12 @@ define(['underscore', 'LocalNode', 'Utils'], function(_, LocalNode, Utils) {
     },
 
     remove: function(key, value, callback) {
-      if (_.isUndefined(callback)) {
-        callback = function() { ; };
+      if (!callback) {
+        callback = function() {};
+      }
+      if (!this._localNode) {
+        callback(new Error("Create or join network at first."));
+        return;
       }
       if (!Utils.isNonemptyString(key) || _.isUndefined(value)) {
         callback(new Error("Invalid arguments."));
@@ -119,27 +131,28 @@ define(['underscore', 'LocalNode', 'Utils'], function(_, LocalNode, Utils) {
     },
 
     getStatuses: function() {
+      if (!this._localNode) {
+        throw new Error("Create or join network at first.");
+      }
       return this._localNode.getStatuses();
     },
 
     getPeerId: function() {
-      if (_.isNull(this._localNode)) {
-        return null;
+      if (!this._localNode) {
+        throw new Error("Create or join network at first.");
       }
-
       return this._localNode.getPeerId();
     },
 
     getNodeId: function() {
-      if (_.isNull(this._localNode)) {
-        return null;
+      if (!this._localNode) {
+        throw new Error("Create or join network at first.");
       }
-
       return this._localNode.nodeId.toHexString();
     },
 
     toString: function() {
-      if (_.isNull(this._localNode)) {
+      if (!this._localNode) {
         return "";
       }
 
