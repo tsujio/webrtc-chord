@@ -41,9 +41,9 @@ define(['underscore', 'PeerAgent', 'Connection', 'Utils'], function(_, PeerAgent
         self._invokeNextCallback(peerId, connection);
       },
 
-      onConnection: function(conn) {
-        if (self._connectionPool.has(conn.peer)) {
-          self.removeConnection(conn.peer);
+      onConnection: function(peerId, conn) {
+        if (self._connectionPool.has(peerId)) {
+          self.removeConnection(peerId);
         }
 
         var connection;

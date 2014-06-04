@@ -31,7 +31,7 @@ define(['underscore', 'peerjs', 'Utils'], function(_, Peer, Utils) {
 
     this._peer.on('open', function(id) {
       self._peer.on('connection', function(conn) {
-        callbacks.onConnection(conn);
+        callbacks.onConnection(conn.peer, conn);
       });
 
       self._peer.on('close', function() {
