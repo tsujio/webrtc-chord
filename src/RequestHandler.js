@@ -11,7 +11,7 @@ define(['underscore', 'ID', 'Response', 'Entry', 'Utils'], function(_, ID, Respo
       switch (request.method) {
       case 'FIND_SUCCESSOR':
         if (!Utils.isNonemptyString(request.params.key)) {
-          this._sendFailureResponse(request, callback);
+          this._sendFailureResponse("Invalid params.", request, callback);
           return;
         }
 
@@ -19,7 +19,7 @@ define(['underscore', 'ID', 'Response', 'Entry', 'Utils'], function(_, ID, Respo
         this._localNode.findSuccessor(key, function(successor, error) {
           if (error) {
             console.log(error);
-            self._sendFailureResponse(request, callback);
+            self._sendFailureResponse(e.message, request, callback);
             return;
           }
 
@@ -34,13 +34,13 @@ define(['underscore', 'ID', 'Response', 'Entry', 'Utils'], function(_, ID, Respo
         this._nodeFactory.create(potentialPredecessorNodeInfo, function(node, error) {
           if (error) {
             console.log(error);
-            this._sendFailureResponse(request, callback);
+            this._sendFailureResponse(e.message, request, callback);
             return;
           }
 
           self._localNode.notifyAndCopyEntries(node, function(references, entries) {
             if (_.isNull(references) || _.isNull(entries)) {
-              self._sendFailureResponse(request, callback);
+              self._sendFailureResponse("Unknown error.", request, callback);
               return;
             }
 
@@ -57,13 +57,13 @@ define(['underscore', 'ID', 'Response', 'Entry', 'Utils'], function(_, ID, Respo
         this._nodeFactory.create(potentialPredecessorNodeInfo, function(node, error) {
           if (error) {
             console.log(error);
-            self._sendFailureResponse(request, callback);
+            self._sendFailureResponse(e.message, request, callback);
             return;
           }
 
           self._localNode.notify(node, function(references) {
             if (_.isNull(references)) {
-              self._sendFailureResponse(request, callback);
+              self._sendFailureResponse("Unknown error.", request, callback);
               return;
             }
 
@@ -123,12 +123,12 @@ define(['underscore', 'ID', 'Response', 'Entry', 'Utils'], function(_, ID, Respo
         try {
           entry = Entry.fromJson(request.params.entry);
         } catch (e) {
-          self._sendFailureResponse(request, callback);;
+          self._sendFailureResponse(e.message, request, callback);;
           return;
         }
         self._localNode.insertEntry(entry, function(inserted) {
           if (!inserted) {
-            self._sendFailureResponse(request, callback);
+            self._sendFailureResponse("Unknown error.", request, callback);
           } else {
             self._sendSuccessResponse({}, request, callback);
           }
@@ -140,12 +140,12 @@ define(['underscore', 'ID', 'Response', 'Entry', 'Utils'], function(_, ID, Respo
         try {
           id = ID.fromHexString(request.params.id);
         } catch (e) {
-          self._sendFailureResponse(request, callback);
+          self._sendFailureResponse(e.message, request, callback);
           return;
         }
         self._localNode.retrieveEntries(id, function(entries) {
           if (_.isNull(entries)) {
-            self._sendFailureResponse(request, callback);
+            self._sendFailureResponse("Unknown error.", request, callback);
           } else {
             self._sendSuccessResponse({
               entries: _.invoke(entries, 'toJson')
@@ -159,12 +159,12 @@ define(['underscore', 'ID', 'Response', 'Entry', 'Utils'], function(_, ID, Respo
         try {
           entry = Entry.fromJson(request.params.entry);
         } catch (e) {
-          self._sendFailureResponse(request, callback);
+          self._sendFailureResponse(e.message, request, callback);
           return;
         }
         self._localNode.removeEntry(entry, function(removed) {
           if (!removed) {
-            self._sendFailureResponse(request, callback);
+            self._sendFailureResponse("Unknown error.", request, callback);
           } else {
             self._sendSuccessResponse({}, request, callback);
           }
@@ -187,7 +187,7 @@ define(['underscore', 'ID', 'Response', 'Entry', 'Utils'], function(_, ID, Respo
         break;
 
       default:
-        this._sendFailureResponse(request, callback);
+        this._sendFailureResponse("Unknown request method type.", request, callback);
         break;
       }
     },
@@ -199,19 +199,18 @@ define(['underscore', 'ID', 'Response', 'Entry', 'Utils'], function(_, ID, Respo
       try {
         response = Response.create('SUCCESS', result, request);
       } catch (e){
-        this._sendFailureResponse(request, callback);
+        this._sendFailureResponse(e.message, request, callback);
         return;
       }
 
       callback(response);
     },
 
-    _sendFailureResponse: function(request, callback) {
+    _sendFailureResponse: function(message, request, callback) {
       var response;
       try {
-        response = Response.create('FAILED', {}, request);
+        response = Response.create('FAILED', {message: message}, request);
       } catch (e) {
-        callback(null);
         return;
       }
 

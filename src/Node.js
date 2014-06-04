@@ -226,7 +226,9 @@ define(['underscore', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Reques
             clearTimeout(timer);
 
             if (response.status !== 'SUCCESS') {
-              callbacks.error(new Error(response.result.message));
+              var error = new Error(
+                "Request to " + self._peerId + " failed: " + response.result.message);
+              callbacks.error(error);
               return;
             }
 
