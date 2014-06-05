@@ -4,8 +4,7 @@ define(['underscore', 'Utils'], function(_, Utils) {
       throw new Error("Invalid argument.");
     }
 
-    if (!Utils.isValidNumber(config.numberOfEntriesInSuccessorList) ||
-        config.numberOfEntriesInSuccessorList < 1) {
+    if (!Utils.isPositiveNumber(config.numberOfEntriesInSuccessorList)) {
       config.numberOfEntriesInSuccessorList = 3;
     }
 

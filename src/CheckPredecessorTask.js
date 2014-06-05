@@ -5,8 +5,7 @@ define(['underscore', 'Utils'], function(_, Utils) {
   };
 
   CheckPredecessorTask.create = function(references, config) {
-    if (!Utils.isValidNumber(config.checkPredecessorTaskInterval) ||
-        config.checkPredecessorTaskInterval < 0) {
+    if (!Utils.isZeroOrPositiveNumber(config.checkPredecessorTaskInterval)) {
       config.checkPredecessorTaskInterval = 30000;
     }
 

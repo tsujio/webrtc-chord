@@ -8,12 +8,10 @@ define(['underscore', 'peerjs', 'Utils'], function(_, Peer, Utils) {
     if (!_.isObject(config.peer.options)) {
       config.peer.options = {};
     }
-    if (!Utils.isValidNumber(config.connectRateLimit) ||
-        config.connectRateLimit < 0) {
+    if (!Utils.isZeroOrPositiveNumber(config.connectRateLimit)) {
       config.connectRateLimit = 3000;
     }
-    if (!Utils.isValidNumber(config.connectionOpenTimeout) ||
-        config.connectionOpenTimeout < 0) {
+    if (!Utils.isZeroOrPositiveNumber(config.connectionOpenTimeout)) {
       config.connectionOpenTimeout = 30000;
     }
 

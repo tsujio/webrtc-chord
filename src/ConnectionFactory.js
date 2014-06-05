@@ -74,16 +74,13 @@ define(['underscore', 'PeerAgent', 'Connection', 'Utils'], function(_, PeerAgent
       }
     });
 
-    if (!Utils.isValidNumber(config.connectionPoolSize) ||
-        config.connectionPoolSize < 0) {
+    if (!Utils.isZeroOrPositiveNumber(config.connectionPoolSize)) {
       config.connectionPoolSize = 10;
     }
-    if (!Utils.isValidNumber(config.connectionCloseDelay) ||
-        config.connectionCloseDelay < 0) {
+    if (!Utils.isZeroOrPositiveNumber(config.connectionCloseDelay)) {
       config.connectionCloseDelay = 5000;
     }
-    if (!Utils.isValidNumber(config.silentConnectionCloseTimeout) ||
-        config.silentConnectionCloseTimeout < 0) {
+    if (!Utils.isZeroOrPositiveNumber(config.silentConnectionCloseTimeout)) {
       config.silentConnectionCloseTimeout = 30000;
     }
     this._connectionPool = new Utils.Cache(config.connectionPoolSize, function(connection) {

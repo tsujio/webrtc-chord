@@ -4,8 +4,7 @@ define(['underscore', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Reques
       throw new Error("Invalid arguments.");
     }
 
-    if (!Utils.isValidNumber(config.requestTimeout) ||
-        config.requestTimeout < 0) {
+    if (!Utils.isZeroOrPositiveNumber(config.requestTimeout)) {
       config.requestTimeout = 180000;
     }
 

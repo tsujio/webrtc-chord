@@ -8,6 +8,14 @@ define(['underscore'], function(_) {
       return !_.isNaN(number) && _.isNumber(number);
     },
 
+    isPositiveNumber: function(number) {
+      return Utils.isValidNumber(number) && number > 0;
+    },
+
+    isZeroOrPositiveNumber: function(number) {
+      return number === 0 || Utils.isPositiveNumber(number);
+    },
+
     insert: function(list, index, item) {
       list.splice(index, 0, item);
     }

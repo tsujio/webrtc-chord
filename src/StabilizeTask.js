@@ -7,8 +7,7 @@ define(['underscore', 'Utils'], function(_, Utils) {
   };
 
   StabilizeTask.create = function(localNode, references, entries, config) {
-    if (!Utils.isValidNumber(config.stabilizeTaskInterval) ||
-        config.stabilizeTaskInterval < 0) {
+    if (!Utils.isZeroOrPositiveNumber(config.stabilizeTaskInterval)) {
       config.stabilizeTaskInterval = 30000;
     }
 

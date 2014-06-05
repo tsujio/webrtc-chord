@@ -6,8 +6,7 @@ define(['underscore', 'Utils'], function(_, Utils) {
   };
 
   FixFingerTask.create = function(localNode, references, config) {
-    if (!Utils.isValidNumber(config.fixFingerTaskInterval) ||
-        config.fixFingerTaskInterval < 0) {
+    if (!Utils.isZeroOrPositiveNumber(config.fixFingerTaskInterval)) {
       config.fixFingerTaskInterval = 30000;
     }
 
