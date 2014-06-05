@@ -249,6 +249,7 @@ define(['underscore', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Reques
       this._requestHandler.handle(request, function(response) {
         self._connectionFactory.create(self._peerId, function(connection, error) {
           if (error) {
+            console.log(error);
             return;
           }
 
