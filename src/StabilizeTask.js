@@ -74,11 +74,19 @@ define(['underscore', 'Utils'], function(_, Utils) {
               self._entries.addAll(entries);
 
               RemoveUnreferencedSuccessorsAndAddReferences(references);
+
+              Utils.debug("[StabilizeTask] successors:", _.map(self._references.getSuccessors(), function(s) {
+                return s.getPeerId();
+              }).toString());
             });
           }
         }
 
         RemoveUnreferencedSuccessorsAndAddReferences(references);
+
+        Utils.debug("[StabilizeTask] successors:", _.map(self._references.getSuccessors(), function(s) {
+          return s.getPeerId();
+        }).toString());
       });
     },
 

@@ -18,6 +18,21 @@ define(['underscore'], function(_) {
 
     insert: function(list, index, item) {
       list.splice(index, 0, item);
+    },
+
+    enableDebugLog: function(enabled) {
+      Utils.debug = function() {
+        if (enabled) {
+          var args = Array.prototype.slice.call(arguments);
+          var d = new Date()
+          var timeStr = [d.getHours(), d.getMinutes(), d.getSeconds()].join(':') + ':';
+          args.unshift(timeStr);
+          console.log.apply(console, args);
+        }
+      };
+    },
+
+    debug: function() {
     }
   };
 

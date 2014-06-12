@@ -235,6 +235,8 @@ define(['underscore', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Reques
           }));
         }
 
+        Utils.debug("Sending request to", self._peerId, ":", request.method);
+
         try {
           connection.send(request);
         } finally {
@@ -246,12 +248,16 @@ define(['underscore', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Reques
     onRequestReceived: function(request) {
       var self = this;
 
+      Utils.debug("Received request from", this._peerId, ":", request.method);
+
       this._requestHandler.handle(request, function(response) {
         self._connectionFactory.create(self._peerId, function(connection, error) {
           if (error) {
             console.log(error);
             return;
           }
+
+          Utils.debug("Sending response to", self._peerId, ":", response.method);
 
           try {
             connection.send(response);
@@ -263,6 +269,8 @@ define(['underscore', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Reques
     },
 
     onResponseReceived: function(response) {
+      Utils.debug("Received response from", this._peerId, ":", response.method, "(", response.status, ")");
+
       var callback = this._nodeFactory.deregisterCallback(response.requestId);
       if (!_.isNull(callback)) {
         callback(response);

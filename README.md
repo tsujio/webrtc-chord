@@ -67,6 +67,9 @@ var config = {
     }
   },
 
+  debug: false,                         // Enable debug log.
+                                        // Defaults to false.
+
   numberOfEntriesInSuccessorList: 3,    // The number of nodes to retain as successor.
                                         // Defaults to 3.
 

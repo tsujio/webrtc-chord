@@ -28,11 +28,17 @@ define(['underscore', 'peerjs', 'Utils'], function(_, Peer, Utils) {
     var onPeerSetup = _.once(callbacks.onPeerSetup);
 
     this._peer.on('open', function(id) {
+      Utils.debug("Peer opend (peer ID:", id, ")");
+
       self._peer.on('connection', function(conn) {
+        Utils.debug("Connection from", conn.peer);
+
         callbacks.onConnection(conn.peer, conn);
       });
 
       self._peer.on('close', function() {
+        Utils.debug("Peer closed.");
+
         callbacks.onPeerClosed();
       });
 
@@ -40,6 +46,8 @@ define(['underscore', 'peerjs', 'Utils'], function(_, Peer, Utils) {
     });
 
     this._peer.on('error', function(error) {
+      Utils.debug("Peer error:", error);
+
       var match = error.message.match(/Could not connect to peer (\w+)/);
       if (match) {
         if (!self.isWaitingOpeningConnection()) {
@@ -82,6 +90,8 @@ define(['underscore', 'peerjs', 'Utils'], function(_, Peer, Utils) {
       }, this._config.connectionOpenTimeout);
 
       conn.on('open', function() {
+        Utils.debug("Connection to", conn.peer, "opened.");
+
         if (!self.isWaitingOpeningConnection()) {
           conn.close();
           return;

@@ -3,6 +3,7 @@ define(['underscore', 'LocalNode', 'Utils'], function(_, LocalNode, Utils) {
     if (!_.isObject(config)) {
       throw new Error("Invalid argument.");
     }
+    Utils.enableDebugLog(config.debug);
 
     this._config = config;
     this._localNode = null;

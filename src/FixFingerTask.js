@@ -33,6 +33,8 @@ define(['underscore', 'Utils'], function(_, Utils) {
             !self._references.containsReference(successor)) {
           self._references.addReference(successor);
         }
+
+        Utils.debug("[FixFingerTask] finger:", nextFingerToFix, ", successor:", successor.getPeerId());
       });
     },
 

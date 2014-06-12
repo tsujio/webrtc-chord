@@ -31,6 +31,9 @@ define(['underscore', 'Utils'], function(_, Utils) {
           console.log(error);
           self._references.removeReference(predecessor);
         }
+
+        predecessor = self._references.getPredecessor();
+        Utils.debug("[CheckPredecessorTask] predecessor:", predecessor ? predecessor.getPeerId() : null);
       });
     },
 

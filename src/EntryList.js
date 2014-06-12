@@ -28,6 +28,8 @@ define(['underscore', 'ID', 'Utils'], function(_, ID, Utils) {
           return a.equals(b);
         });
       }
+
+      Utils.debug("An entry added (key:", entry.id.toHexString(), ")");
     },
 
     remove: function(entry) {
@@ -43,6 +45,8 @@ define(['underscore', 'ID', 'Utils'], function(_, ID, Utils) {
       if (this._entries[entry.id.toHexString()].size() === 0) {
         delete this._entries[entry.id.toHexString()];
       }
+
+      Utils.debug("An entry removed (key:", entry.id.toHexString(), ")");
     },
 
     getEntries: function(id) {

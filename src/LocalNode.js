@@ -44,20 +44,28 @@ define([
         fixFingerTask: FixFingerTask.create(this, this._references, this._config),
         checkPredecessorTask: CheckPredecessorTask.create(this._references, this._config)
       };
+
+      Utils.debug("Created tasks.");
     },
 
     _shutdownTasks: function() {
       _.invoke(this._tasks, 'shutdown');
+
+      Utils.debug("Shutdown tasks.");
     },
 
     create: function(callback) {
       this._createTasks();
+
+      Utils.debug("Created network (peer ID:", this._peerId, ").");
 
       callback(this._peerId);
     },
 
     join: function(bootstrapId, callback) {
       var self = this;
+
+      Utils.debug("Trying to join network.");
 
       this._nodeFactory.create({peerId: bootstrapId}, function(bootstrapNode, error) {
         if (error) {
@@ -69,31 +77,41 @@ define([
 
         bootstrapNode.findSuccessor(self.nodeId, function(successor, error) {
           if (error) {
+            Utils.debug("[join] Failed to find successor:", error);
             self._references.removeReference(bootstrapNode);
             callback(null, error);
             return;
           }
 
+          Utils.debug("[join] Found successor:", successor.getPeerId());
+
           self._references.addReference(successor);
 
           var _notifyAndCopyEntries = function(node, callback) {
+            Utils.debug("[join] Trying to notify and copy entries (remote peer ID:", node.getPeerId(), ").");
+
             node.notifyAndCopyEntries(self, function(refs, entries, error) {
               if (error) {
+                Utils.debug("[join] Failed to notify and copy entries (remote peer ID:", node.getPeerId(), ").");
                 callback(null, null, error);
                 return;
               }
 
               if (_.size(refs) === 1) {
+                Utils.debug("[join]", successor.getPeerId(), "is successor and also predecessor.");
                 self._references.addReferenceAsPredecessor(successor);
                 callback(refs, entries);
                 return;
               }
 
               if (self.nodeId.isInInterval(refs[0].nodeId, successor.nodeId)) {
+                Utils.debug("[join]", refs[0].getPeerId(), "is predecessor.");
                 self._references.addReferenceAsPredecessor(refs[0]);
                 callback(refs, entries);
                 return;
               }
+
+              Utils.debug("[join] Failed to find predecessor. Retry to notify and copy entries.");
 
               self._references.addReference(refs[0]);
               _notifyAndCopyEntries(refs[0], callback);
@@ -122,6 +140,8 @@ define([
 
             self._createTasks();
 
+            Utils.debug("Joining network succeeded.");
+
             callback(self._peerId);
           });
         });
@@ -139,6 +159,8 @@ define([
       }
 
       this._nodeFactory.destroy();
+
+      Utils.debug("Left network.");
 
       callback();
     },
