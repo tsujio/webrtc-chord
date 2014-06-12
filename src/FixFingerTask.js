@@ -27,6 +27,7 @@ define(['underscore', 'Utils'], function(_, Utils) {
       this._localNode.findSuccessor(lookForID, function(successor, error) {
         if (error) {
           console.log(error);
+          return;
         }
 
         if (!_.isNull(successor) &&

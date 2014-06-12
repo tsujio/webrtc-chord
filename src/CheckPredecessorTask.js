@@ -30,6 +30,7 @@ define(['underscore', 'Utils'], function(_, Utils) {
         if (error) {
           console.log(error);
           self._references.removeReference(predecessor);
+          return;
         }
 
         predecessor = self._references.getPredecessor();
