@@ -1,5 +1,5 @@
 define(['underscore', 'LocalNode', 'Utils'], function(_, LocalNode, Utils) {
-  var Chord = function(config) {
+  var Chord = function(config, onMessageReceivedCallback) {
     if (!_.isObject(config)) {
       throw new Error("Invalid argument.");
     }
@@ -9,6 +9,7 @@ define(['underscore', 'LocalNode', 'Utils'], function(_, LocalNode, Utils) {
     this._localNode = null;
     this.onentriesinserted = function(entries) { ; };
     this.onentriesremoved = function(entries) { ; };
+    this._onMessageReceivedCallback = onMessageReceivedCallback;
   };
 
   Chord.prototype = {
@@ -129,6 +130,25 @@ define(['underscore', 'LocalNode', 'Utils'], function(_, LocalNode, Utils) {
       }
 
       this._localNode.remove(key, value, callback);
+    },
+
+    sendMessage: function(toPeerId, message) {
+      if (!this._localNode) {
+        throw new Error("Create or join network at first.");
+      }
+      this._localNode.sendMessage(toPeerId, message);
+    },
+
+    onMessageReceived: function(fromPeerId, message) {
+      this._onMessageReceivedCallback(fromPeerId, message);
+    },
+
+    listAllPeers: function(callback) {
+      if (!this._localNode) {
+        callback(null, new Error("Create or join network at first."));
+        return;
+      }
+      this._localNode.listAllPeers(callback);
     },
 
     getStatuses: function() {

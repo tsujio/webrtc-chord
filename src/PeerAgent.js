@@ -114,6 +114,10 @@ define(['underscore', 'peerjs', 'Utils'], function(_, Peer, Utils) {
 
     getPeerId: function() {
       return this._peer.id;
+    },
+
+    listAllPeers: function(callback) {
+      this._peer.listAllPeers(callback);
     }
   };
 

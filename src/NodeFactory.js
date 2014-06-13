@@ -106,6 +106,10 @@ define([
 
     destroy: function() {
       this._connectionFactory.destroy();
+    },
+
+    listAllPeers: function(callback) {
+      this._connectionFactory.listAllPeers(callback);
     }
   };
 

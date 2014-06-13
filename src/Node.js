@@ -200,6 +200,10 @@ define(['underscore', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Reques
       });
     },
 
+    sendMessage: function(message) {
+      this._sendRequest('UPPER_LAYER_MESSAGE', {message: message});
+    },
+
     _sendRequest: function(method, params, callbacks) {
       var self = this;
 
@@ -250,7 +254,7 @@ define(['underscore', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Reques
 
       Utils.debug("Received request from", this._peerId, ":", request.method);
 
-      this._requestHandler.handle(request, function(response) {
+      this._requestHandler.handle(this._peerId, request, function(response) {
         self._connectionFactory.create(self._peerId, function(connection, error) {
           if (error) {
             console.log(error);

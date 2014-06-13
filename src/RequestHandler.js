@@ -5,7 +5,7 @@ define(['underscore', 'ID', 'Response', 'Entry', 'Utils'], function(_, ID, Respo
   }
 
   RequestHandler.prototype = {
-    handle: function(request, callback) {
+    handle: function(fromPeerId, request, callback) {
       var self = this;
 
       switch (request.method) {
@@ -169,6 +169,13 @@ define(['underscore', 'ID', 'Response', 'Entry', 'Utils'], function(_, ID, Respo
             self._sendSuccessResponse({}, request, callback);
           }
         });
+        break;
+
+      case 'UPPER_LAYER_MESSAGE':
+        if (!_.has(request.params, 'message')) {
+          return;
+        }
+        self._localNode.onMessageReceived(fromPeerId, request.params.message);
         break;
 
       case 'SHUTDOWN':

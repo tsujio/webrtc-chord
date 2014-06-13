@@ -16,5 +16,5 @@
     endFile: 'end.frag'
   },
 
-  out: "../dist/webrtc-chord.js"
+  out: "../dist/webrtc-net.js"
 })

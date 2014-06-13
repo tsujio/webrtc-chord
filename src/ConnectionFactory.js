@@ -169,6 +169,10 @@ define(['underscore', 'PeerAgent', 'Connection', 'Utils'], function(_, PeerAgent
 
     getPeerId: function() {
       return this._peerAgent.getPeerId();
+    },
+
+    listAllPeers: function(callback) {
+      this._peerAgent.listAllPeers(callback);
     }
   };
 

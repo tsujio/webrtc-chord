@@ -368,6 +368,33 @@ define([
       callback(true);
     },
 
+    sendMessage: function(toPeerId, message) {
+      if (_.isNull(toPeerId)) {
+        var targets = Utils.Set(this._references.getFirstFingerTableEntries(), function(a, b) {
+          return a.equals(b);
+        });
+        _.each(this._references.getSuccessors(), function(successor) {
+          targets.put(successor);
+        });
+        _.each(targets.items(), function(node) {
+          node.sendMessage(message);
+        });
+        return;
+      }
+
+      this._nodeFactory.create({peerId: toPeerId}, function(node) {
+        node.sendMessage(message);
+      });
+    },
+
+    onMessageReceived: function(fromPeerId, message) {
+      this._chord.onMessageReceived(fromPeerId, message);
+    },
+
+    listAllPeers: function(callback) {
+      this._nodeFactory.listAllPeers(callback);
+    },
+
     getStatuses: function() {
       var ret = this._references.getStatuses();
       ret['entries'] = this._entries.getStatus();
