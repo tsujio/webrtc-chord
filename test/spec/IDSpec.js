@@ -131,6 +131,23 @@ define(['ID'], function(ID) {
         expect(largerId.isInInterval(id, smallerId)).toBeTruthy();
         expect(smallerId.isInInterval(largerId, id)).toBeTruthy();
       });
+
+      it("should appropriately process max and min IDs", function() {
+        var minId = ID.fromHexString("0000000000000000000000000000000000000000000000000000000000000000");
+        var maxId = ID.fromHexString("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+
+        expect(minId.isInInterval(smallerId, largerId)).toBeFalsy();
+        expect(maxId.isInInterval(smallerId, largerId)).toBeFalsy();
+        expect(minId.isInInterval(largerId, smallerId)).toBeTruthy();
+        expect(maxId.isInInterval(largerId, smallerId)).toBeTruthy();
+      });
+
+      it("should return false if from or to are same as the sample", function() {
+        expect(smallerId.isInInterval(smallerId, largerId)).toBeFalsy();
+        expect(smallerId.isInInterval(largerId, smallerId)).toBeFalsy();
+        expect(largerId.isInInterval(smallerId, largerId)).toBeFalsy();
+        expect(largerId.isInInterval(largerId, largerId)).toBeFalsy();
+      });
     });
 
     describe("#addPowerOfTwo", function() {

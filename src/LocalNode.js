@@ -87,8 +87,14 @@ define([
 
           self._references.addReference(successor);
 
-          var _notifyAndCopyEntries = function(node, callback) {
-            Utils.debug("[join] Trying to notify and copy entries (remote peer ID:", node.getPeerId(), ").");
+          var _notifyAndCopyEntries = function(node, attempts, callback) {
+            Utils.debug("[join] Trying to notify and copy entries "+ 
+                        "(remote peer ID:", node.getPeerId(), ", attempts:", attempts, ").");
+
+            if (attempts === 0) {
+              callback(null, null, new Error("Reached maximum count of attempts."));
+              return;
+            }
 
             node.notifyAndCopyEntries(self, function(refs, entries, error) {
               if (error) {
@@ -104,6 +110,12 @@ define([
                 return;
               }
 
+              if (refs[0].equals(self)) {
+                Utils.debug("[join] Left predecessor as null.");
+                callback(refs, entries);
+                return;
+              }
+
               if (self.nodeId.isInInterval(refs[0].nodeId, successor.nodeId)) {
                 Utils.debug("[join]", refs[0].getPeerId(), "is predecessor.");
                 self._references.addReferenceAsPredecessor(refs[0]);
@@ -114,12 +126,12 @@ define([
               Utils.debug("[join] Failed to find predecessor. Retry to notify and copy entries.");
 
               self._references.addReference(refs[0]);
-              _notifyAndCopyEntries(refs[0], callback);
+              _notifyAndCopyEntries(refs[0], attempts - 1, callback);
             });
           };
-          _notifyAndCopyEntries(successor, function(refs, entries, error) {
+          _notifyAndCopyEntries(successor, 3, function(refs, entries, error) {
             if (error) {
-              console.log(error);
+              console.log("Failed to notify and copy entries:", error);
               self._createTasks();
               callback(self._peerId);
               return;
