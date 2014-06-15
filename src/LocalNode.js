@@ -110,6 +110,12 @@ define([
                 return;
               }
 
+              if (refs[0].equals(self)) {
+                Utils.debug("[join] Left predecessor as null.");
+                callback(refs, entries);
+                return;
+              }
+
               if (self.nodeId.isInInterval(refs[0].nodeId, successor.nodeId)) {
                 Utils.debug("[join]", refs[0].getPeerId(), "is predecessor.");
                 self._references.addReferenceAsPredecessor(refs[0]);
