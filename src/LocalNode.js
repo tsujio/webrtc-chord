@@ -370,7 +370,7 @@ define([
 
     sendMessage: function(toPeerId, message) {
       if (_.isNull(toPeerId)) {
-        var targets = Utils.Set(this._references.getFirstFingerTableEntries(), function(a, b) {
+        var targets = new Utils.Set(this._references.getFirstFingerTableEntries(), function(a, b) {
           return a.equals(b);
         });
         _.each(this._references.getSuccessors(), function(successor) {
