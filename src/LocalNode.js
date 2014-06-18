@@ -382,15 +382,9 @@ define([
 
     sendMessage: function(toPeerId, message) {
       if (_.isNull(toPeerId)) {
-        var targets = new Utils.Set(this._references.getFirstFingerTableEntries(), function(a, b) {
-          return a.equals(b);
-        });
-        _.each(this._references.getSuccessors(), function(successor) {
-          targets.put(successor);
-        });
-        _.each(targets.items(), function(node) {
-          node.sendMessage(message);
-        });
+        if (!_.isNull(this._references.getSuccessor())) {
+          this._references.getSuccessor().sendMessage(message);
+        }
         return;
       }
 
