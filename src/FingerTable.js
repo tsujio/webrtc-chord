@@ -6,7 +6,7 @@ define(['underscore'], function(_) {
 
     this._localId = localId;
     this._references = references;
-    this._remoteNodes = {};
+    this._remoteNodes = _(this._localId.getLength()).times(function() { return null; });
   };
 
   FingerTable.prototype = {
@@ -14,7 +14,7 @@ define(['underscore'], function(_) {
       if (!_.isNumber(index) || _.isNull(node)) {
         throw new Error("Invalid arguments.");
       }
-      if (index < 0 || index >= this._localId.getLength()) {
+      if (index < 0 || index >= _.size(this._remoteNodes)) {
         throw new Error("Invalid index.");
       }
 
@@ -25,13 +25,10 @@ define(['underscore'], function(_) {
       if (!_.isNumber(index)) {
         throw new Error("Invalid argument.");
       }
-      if (index < 0 || index >= this._localId.getLength()) {
+      if (index < 0 || index >= _.size(this._remoteNodes)) {
         throw new Error("Invalid index.");
       }
 
-      if (!_.has(this._remoteNodes, index)) {
-        return null;
-      }
       return this._remoteNodes[index];
     },
 
@@ -39,13 +36,13 @@ define(['underscore'], function(_) {
       if (!_.isNumber(index)) {
         throw new Error("Invalid argument.");
       }
-      if (index < 0 || index >= this._localId.getLength()) {
+      if (index < 0 || index >= _.size(this._remoteNodes)) {
         throw new Error("Invalid index.");
       }
 
       var overwrittenNode = this._getEntry(index);
 
-      delete this._remoteNodes[index];
+      this._remoteNodes[index] = null;
 
       if (!_.isNull(overwrittenNode)) {
         this._references.disconnectIfUnreferenced(overwrittenNode);
@@ -57,7 +54,7 @@ define(['underscore'], function(_) {
         throw new Error("Invalid argument.");
       }
 
-      for (var i = 0; i < this._localId.getLength(); i++) {
+      for (var i = 0; i < _.size(this._remoteNodes); i++) {
         var startOfInterval = this._localId.addPowerOfTwo(i);
         if (!startOfInterval.isInInterval(this._localId, node.nodeId)) {
           break;
@@ -78,16 +75,10 @@ define(['underscore'], function(_) {
         throw new Error("Invalid argument.");
       }
 
-      var sortedKeys = _.chain(this._remoteNodes)
-        .keys()
-        .map(function(key) { return parseInt(key); })
-        .sortBy()
-        .value();
-      for (var i = _.size(sortedKeys) - 1; i >= 0; i--) {
-        var k = sortedKeys[i]
-        if (!_.isNull(this._getEntry(k)) &&
-            this._getEntry(k).nodeId.isInInterval(this._localId, key)) {
-          return this._getEntry(k);
+      for (var i = _.size(this._remoteNodes) - 1; i >= 0; i--) {
+        if (!_.isNull(this._getEntry(i)) &&
+            this._getEntry(i).nodeId.isInInterval(this._localId, key)) {
+          return this._getEntry(i);
         }
       }
       return null;
@@ -101,14 +92,8 @@ define(['underscore'], function(_) {
       }
 
       var referenceForReplacement = null;
-      var sortedKeys = _.chain(this._remoteNodes)
-        .keys()
-        .map(function (key) { return parseInt(key); })
-        .sortBy()
-        .value();
-      for (var i = _.size(sortedKeys) - 1; i >= 0; i--) {
-        var k = sortedKeys[i];
-        var n = this._getEntry(k);
+      for (var i = _.size(this._remoteNodes) - 1; i >= 0; i--) {
+        var n = this._getEntry(i);
         if (node.equals(n)) {
           break;
         }
@@ -117,12 +102,12 @@ define(['underscore'], function(_) {
         }
       }
 
-      _.each(sortedKeys, function(key) {
-        if (node.equals(self._getEntry(key))) {
+      _.each(this._remoteNodes, function(n, i) {
+        if (node.equals(self._getEntry(i))) {
           if (_.isNull(referenceForReplacement)) {
-            self._unsetEntry(key);
+            self._unsetEntry(i);
           } else {
-            self._setEntry(key, referenceForReplacement);
+            self._setEntry(i, referenceForReplacement);
           }
         }
       });
@@ -134,16 +119,10 @@ define(['underscore'], function(_) {
 
     getFirstFingerTableEntries: function(count) {
       var result = [];
-      var sortedKeys = _.chain(this._remoteNodes)
-        .keys()
-        .map(function (key) { return parseInt(key); })
-        .sortBy()
-        .value();
-      for (var i = 0; i < _.size(sortedKeys); i++) {
-        var k = sortedKeys[i];
-        if (!_.isNull(this._getEntry(k))) {
-          if (_.isEmpty(result) || !_.last(result).equals(this._getEntry(k))) {
-            result.push(this._getEntry(k));
+      for (var i = 0; i < _.size(this._remoteNodes); i++) {
+        if (!_.isNull(this._getEntry(i))) {
+          if (_.isEmpty(result) || !_.last(result).equals(this._getEntry(i))) {
+            result.push(this._getEntry(i));
           }
         }
         if (_.size(result) >= count) {
@@ -159,14 +138,14 @@ define(['underscore'], function(_) {
       }
 
       return _.some(this._remoteNodes, function(node) {
-        return node.equals(reference);
+        return reference.equals(node);
       });
     },
 
     getStatus: function() {
       var self = this;
-      return _(this._localId.getLength()).times(function(i) {
-        return _.isNull(self._getEntry(i)) ? null : self._getEntry(i).toNodeInfo();
+      return _.map(this._remoteNodes, function(node) {
+        return _.isNull(node) ? null : node.toNodeInfo();
       });
     },
 
@@ -174,29 +153,30 @@ define(['underscore'], function(_) {
       var self = this;
 
       return "[FingerTable]\n" + _.chain(this._remoteNodes)
-        .keys()
-        .map(function(key) { return parseInt(key); })
-        .sortBy()
-        .map(function(key, i, keys) {
-          if (i === 0 || (i > 0 && !self._getEntry(keys[i]).equals(self._getEntry(keys[i - 1])))) {
-            return "[" + key + "] " + self._getEntry(key).toString();
+        .map(function(node, i) {
+          if (_.isNull(node)) {
+            return "";
           }
 
-          if (i === _.size(keys) - 1 ||
-              (i < _.size(keys) - 1 && !self._getEntry(keys[i]).equals(self._getEntry(keys[i + 1])))) {
-            return "[" + key + "]";
+          if (i === 0 || (i > 0 && !node.equals(self._getEntry(i - 1)))) {
+            return "[" + i + "] " + node.toString();
+          }
+
+          if (i === _.size(self._remoteNodes) - 1 ||
+              !node.equals(self._getEntry(i + 1))) {
+            return "[" + i + "]";
           }
 
           if ((i > 1 &&
-               self._getEntry(keys[i]).equals(self._getEntry(keys[i - 1])) &&
-               !self._getEntry(keys[i]).equals(self._getEntry(keys[i - 2]))) ||
-              (i === 1 && self._getEntry(keys[i]).equals(self._getEntry(keys[i - 1])))) {
+               node.equals(self._getEntry(i - 1)) &&
+               !node.equals(self._getEntry(i - 2))) ||
+              (i === 1 && node.equals(self._getEntry(i - 1)))) {
             return "..."
           }
 
           if (i > 1 &&
-              self._getEntry(keys[i]).equals(self._getEntry(keys[i - 1])) &&
-              self._getEntry(keys[i]).equals(self._getEntry(keys[i - 2]))) {
+              node.equals(self._getEntry(i - 1)) &&
+              node.equals(self._getEntry(i - 2))) {
             return "";
           }
 
