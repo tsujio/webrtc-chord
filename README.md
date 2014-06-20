@@ -163,6 +163,15 @@ chord.onentriesremoved = function(removedEntries) {
 };
 ```
 
+APIs of get/set entries from/to your node are also provided.
+```javascript
+// Get the entries stored in your node
+var entries = chord.getEntries();
+
+// Set entries to your node
+chord.setEntries(entries);
+```
+
 ## Leave network
 ```javascript
 // Leave chord network

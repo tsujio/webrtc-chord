@@ -112,6 +112,15 @@ define(['underscore', 'ID', 'Utils'], function(_, ID, Utils) {
         .value();
     },
 
+    dump: function() {
+      return _.chain(this._entries)
+        .map(function(entries) {
+          return _.invoke(entries.items(), 'toJson');
+        })
+        .flatten()
+        .value();
+    },
+
     toString: function() {
       var self = this;
 

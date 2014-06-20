@@ -234,6 +234,17 @@ define([
       });
     },
 
+    
+    getEntries: function() {
+      return this._entries.dump();
+    },
+
+    setEntries: function(entries) {
+      this._entries.addAll(_.map(entries, function(entry) {
+        return Entry.fromJson(entry);
+      }));
+    },
+
     findSuccessor: function(key, callback) {
       var self = this;
 

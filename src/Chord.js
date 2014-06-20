@@ -131,6 +131,20 @@ define(['underscore', 'LocalNode', 'Utils'], function(_, LocalNode, Utils) {
       this._localNode.remove(key, value, callback);
     },
 
+    getEntries: function() {
+      if (!this._localNode) {
+        throw new Error("Create or join network at first.");
+      }
+      return this._localNode.getEntries();
+    },
+
+    setEntries: function(entries) {
+      if (!this._localNode) {
+        throw new Error("Create or join network at first.");
+      }
+      return this._localNode.setEntries(entries);
+    },
+
     getStatuses: function() {
       if (!this._localNode) {
         throw new Error("Create or join network at first.");
