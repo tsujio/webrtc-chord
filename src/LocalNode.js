@@ -356,7 +356,7 @@ define([
         successor.insertReplicas([entry]);
       });
 
-      callback(true);
+      callback();
     },
 
     retrieveEntries: function(id, callback) {
@@ -388,7 +388,7 @@ define([
         successor.removeReplicas(self.nodeId, [entry]);
       });
 
-      callback(true);
+      callback();
     },
 
     getStatuses: function() {

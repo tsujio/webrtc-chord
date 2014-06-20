@@ -126,8 +126,9 @@ define(['underscore', 'ID', 'Response', 'Entry', 'Utils'], function(_, ID, Respo
           self._sendFailureResponse(e.message, request, callback);;
           return;
         }
-        self._localNode.insertEntry(entry, function(inserted) {
-          if (!inserted) {
+        self._localNode.insertEntry(entry, function(error) {
+          if (error) {
+            console.log("Failed to insert entry:", error);
             self._sendFailureResponse("Unknown error.", request, callback);
           } else {
             self._sendSuccessResponse({}, request, callback);
@@ -143,8 +144,9 @@ define(['underscore', 'ID', 'Response', 'Entry', 'Utils'], function(_, ID, Respo
           self._sendFailureResponse(e.message, request, callback);
           return;
         }
-        self._localNode.retrieveEntries(id, function(entries) {
-          if (_.isNull(entries)) {
+        self._localNode.retrieveEntries(id, function(entries, error) {
+          if (error) {
+            console.log("Failed to retrieve entries:", error);
             self._sendFailureResponse("Unknown error.", request, callback);
           } else {
             self._sendSuccessResponse({
@@ -162,8 +164,9 @@ define(['underscore', 'ID', 'Response', 'Entry', 'Utils'], function(_, ID, Respo
           self._sendFailureResponse(e.message, request, callback);
           return;
         }
-        self._localNode.removeEntry(entry, function(removed) {
-          if (!removed) {
+        self._localNode.removeEntry(entry, function(error) {
+          if (error) {
+            console.log("Failed to remove entry:", error);
             self._sendFailureResponse("Unknown error.", request, callback);
           } else {
             self._sendSuccessResponse({}, request, callback);
