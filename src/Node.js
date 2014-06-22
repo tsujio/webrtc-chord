@@ -121,11 +121,11 @@ define(['underscore', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Reques
     ping: function(callback) {
       this._sendRequest('PING', {}, {
         success: function(result) {
-          callback(true);
+          callback();
         },
 
         error: function(error) {
-          callback(false, error);
+          callback(error);
         }
       });
     },
