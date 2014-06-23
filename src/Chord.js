@@ -104,11 +104,11 @@ define(['underscore', 'LocalNode', 'Utils'], function(_, LocalNode, Utils) {
         callback = function() {};
       }
       if (!this._localNode) {
-        callback(new Error("Create or join network at first."));
+        callback(null, new Error("Create or join network at first."));
         return;
       }
       if (!Utils.isNonemptyString(key)) {
-        callback(new Error("Invalid argument."));
+        callback(null, new Error("Invalid argument."));
         return;
       }
 
