@@ -94,6 +94,10 @@ define(['underscore', 'ID', 'Utils'], function(_, ID, Utils) {
       });
     },
 
+    has: function(id) {
+      return _.has(this._entries, id.toHexString());
+    },
+
     getNumberOfStoredEntries: function() {
       return _.size(this._entries);
     },
