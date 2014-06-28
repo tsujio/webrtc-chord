@@ -10,6 +10,11 @@ define(['underscore', 'cryptojs', 'Utils'], function(_, CryptoJS, Utils) {
     }
 
     this._bytes = _.last(bytes, ID._BYTE_SIZE);
+    this._hexString = _.map(this._bytes, function(b) {
+      var str = b.toString(16);
+      return b < 0x10 ? "0" + str : str;
+    }).join("");
+    this._bitLength = _.size(this._bytes) * 8;
   };
 
   ID._BYTE_SIZE = 32;
@@ -24,10 +29,10 @@ define(['underscore', 'cryptojs', 'Utils'], function(_, CryptoJS, Utils) {
 
   ID._createBytes = function(str) {
     var hash = CryptoJS.SHA256(str).toString(CryptoJS.enc.Hex);
-    return ID._createBytesfromHexString(hash);
+    return ID._createBytesFromHexString(hash);
   };
 
-  ID._createBytesfromHexString = function(str) {
+  ID._createBytesFromHexString = function(str) {
     if (!Utils.isNonemptyString(str)) {
       throw new Error("Invalid argument.");
     }
@@ -38,7 +43,7 @@ define(['underscore', 'cryptojs', 'Utils'], function(_, CryptoJS, Utils) {
   };
 
   ID.fromHexString = function(str) {
-    return new ID(ID._createBytesfromHexString(str));
+    return new ID(ID._createBytesFromHexString(str));
   };
 
   ID.prototype = {
@@ -55,8 +60,8 @@ define(['underscore', 'cryptojs', 'Utils'], function(_, CryptoJS, Utils) {
         return (this.compareTo(fromId) > 0 && this.compareTo(toId) < 0);
       }
 
-      return ((!fromId.equals(ID.maxId) && this.compareTo(fromId) > 0 && this.compareTo(ID.maxId) <= 0) ||
-              (!ID.minId.equals(toId) && this.compareTo(ID.minId) >= 0 && this.compareTo(toId) < 0));
+      return ((this.compareTo(fromId) > 0 && this.compareTo(ID.maxId) <= 0 && !fromId.equals(ID.maxId)) ||
+              (this.compareTo(ID.minId) >= 0 && this.compareTo(toId) < 0 && !ID.minId.equals(toId)));
     },
 
     addPowerOfTwo: function(powerOfTwo) {
@@ -87,11 +92,10 @@ define(['underscore', 'cryptojs', 'Utils'], function(_, CryptoJS, Utils) {
         throw new Error("Invalid argument.");
       }
 
-      var bytes = _.zip(this._bytes, id._bytes);
-      for (var i = 0; i < bytes.length; i++) {
-        if (bytes[i][0] < bytes[i][1]) {
+      for (var i = 0; i < ID._BYTE_SIZE; i++) {
+        if (this._bytes[i] < id._bytes[i]) {
           return -1;
-        } else if (bytes[i][0] > bytes[i][1]) {
+        } else if (this._bytes[i] > id._bytes[i]) {
           return 1;
         }
       }
@@ -103,14 +107,11 @@ define(['underscore', 'cryptojs', 'Utils'], function(_, CryptoJS, Utils) {
     },
 
     getLength: function() {
-      return _.size(this._bytes) * 8;
+      return this._bitLength;
     },
 
     toHexString: function() {
-      return _.map(this._bytes, function(b) {
-        var str = b.toString(16);
-        return b < 0x10 ? "0" + str : str;
-      }).join("");
+      return this._hexString;
     }
   };
 
