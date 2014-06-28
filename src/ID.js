@@ -46,6 +46,22 @@ define(['underscore', 'cryptojs', 'Utils'], function(_, CryptoJS, Utils) {
     return new ID(ID._createBytesFromHexString(str));
   };
 
+  ID._addInBytes = function(bytes1, bytes2) {
+    var copy = _.clone(bytes1);
+    var carry = 0;
+    for (var i = _.size(bytes1) - 1; i >= 0; i--) {
+      copy[i] += (bytes2[i] + carry);
+      if (copy[i] < 0) {
+        carry = -1;
+        copy[i] += 0x100;
+      } else {
+        carry = copy[i] >> 8;
+      }
+      copy[i] &= 0xff;
+    }
+    return copy;
+  };
+
   ID.prototype = {
     isInInterval: function(fromId, toId) {
       if (_.isNull(fromId) || _.isNull(toId)) {
@@ -85,6 +101,31 @@ define(['underscore', 'cryptojs', 'Utils'], function(_, CryptoJS, Utils) {
       }
 
       return new ID(copy);
+    },
+
+    add: function(id) {
+      return new ID(ID._addInBytes(this._bytes, id._bytes));
+    },
+
+    sub: function(id) {
+      return new ID(ID._addInBytes(this._bytes, _.map(id._bytes, function(b) { return -b; })));
+    },
+
+    getIntervalInPowerOfTwoFrom: function(id) {
+      if (this.equals(id)) {
+        throw new Error("Invalid argument.");
+      }
+
+      var diff = this.sub(id);
+      for (var i = 0; i < this.getLength(); i++) {
+        if (ID.minId.addPowerOfTwo(i).compareTo(diff) > 0) {
+          if (i === 0) {
+            throw new Error("Unknown situation.");
+          }
+          break;
+        }
+      }
+      return i - 1;
     },
 
     compareTo: function(id) {
