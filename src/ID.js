@@ -87,11 +87,11 @@ define(['underscore', 'cryptojs', 'Utils'], function(_, CryptoJS, Utils) {
         throw new Error("Invalid argument.");
       }
 
-      var bytes = _.zip(this._bytes, id._bytes);
-      for (var i = 0; i < bytes.length; i++) {
-        if (bytes[i][0] < bytes[i][1]) {
+      for (var i = 0; i < this._bytes.length; i++) {
+
+        if (this._bytes[i] < id._bytes[i]) {
           return -1;
-        } else if (bytes[i][0] > bytes[i][1]) {
+        } else if (this._bytes[i] > id._bytes[i]) {
           return 1;
         }
       }
