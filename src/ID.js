@@ -55,14 +55,8 @@ define(['underscore', 'cryptojs', 'Utils'], function(_, CryptoJS, Utils) {
         return (this.compareTo(fromId) > 0 && this.compareTo(toId) < 0);
       }
 
-      var minId = new ID(_(_.size(this._bytes)).times(function() {
-        return 0x00;
-      }));
-      var maxId = new ID(_(_.size(this._bytes)).times(function() {
-        return 0xff;
-      }));
-      return ((!fromId.equals(maxId) && this.compareTo(fromId) > 0 && this.compareTo(maxId) <= 0) ||
-              (!minId.equals(toId) && this.compareTo(minId) >= 0 && this.compareTo(toId) < 0));
+      return ((!fromId.equals(ID.maxId) && this.compareTo(fromId) > 0 && this.compareTo(ID.maxId) <= 0) ||
+              (!ID.minId.equals(toId) && this.compareTo(ID.minId) >= 0 && this.compareTo(toId) < 0));
     },
 
     addPowerOfTwo: function(powerOfTwo) {
@@ -119,6 +113,14 @@ define(['underscore', 'cryptojs', 'Utils'], function(_, CryptoJS, Utils) {
       }).join("");
     }
   };
+
+  ID.minId = new ID(_(ID._BYTE_SIZE).times(function() {
+    return 0x00;
+  }));
+
+  ID.maxId = new ID(_(ID._BYTE_SIZE).times(function() {
+    return 0xff;
+  }));
 
   return ID;
 });
