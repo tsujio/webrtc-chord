@@ -5,6 +5,10 @@ define([
   _, NodeFactory, EntryList, Entry, ReferenceList, ID, StabilizeTask, FixFingerTask, CheckPredecessorTask, Utils
 ) {
   var LocalNode = function(chord, config) {
+    if (!Utils.isPositiveNumber(config.maximumNumberOfAttemptsOfNotifyAndCopyOnJoin)) {
+      config.maximumNumberOfAttemptsOfNotifyAndCopyOnJoin = 5;
+    }
+
     this._chord = chord;
     this._config = config;
     this.nodeId = null;
@@ -92,7 +96,7 @@ define([
                         "(remote peer ID:", node.getPeerId(), ", attempts:", attempts, ").");
 
             if (attempts === 0) {
-              callback(null, null, new Error("Reached maximum count of attempts."));
+              callback(null, null, new Error("Reached maximum number of attempts of NOTIFY_AND_COPY."));
               return;
             }
 
@@ -129,7 +133,8 @@ define([
               _notifyAndCopyEntries(refs[0], attempts - 1, callback);
             });
           };
-          _notifyAndCopyEntries(successor, 3, function(refs, entries, error) {
+          var maximumNumberOfAttempts = self._config.maximumNumberOfAttemptsOfNotifyAndCopyOnJoin;
+          _notifyAndCopyEntries(successor, maximumNumberOfAttempts, function(refs, entries, error) {
             if (error) {
               console.log("Failed to notify and copy entries:", error);
               self._createTasks();
