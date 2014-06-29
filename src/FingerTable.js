@@ -1,6 +1,6 @@
 define(['underscore'], function(_) {
   var FingerTable = function(localId, references) {
-    if (_.isNull(localId) || _.isNull(references)) {
+    if (!localId || !references) {
       throw new Error("Invalid arguments.");
     }
 
@@ -14,7 +14,7 @@ define(['underscore'], function(_) {
 
   FingerTable.prototype = {
     addReference: function(node) {
-      if (_.isNull(node)) {
+      if (!node) {
         throw new Error("Invalid argument.");
       }
 
@@ -37,7 +37,7 @@ define(['underscore'], function(_) {
     },
 
     getClosestPrecedingNode: function(key) {
-      if (_.isNull(key)) {
+      if (!key) {
         throw new Error("Invalid argument.");
       }
 
@@ -52,7 +52,7 @@ define(['underscore'], function(_) {
     removeReference: function(node) {
       var self = this;
 
-      if (_.isNull(node)) {
+      if (!node) {
         throw new Error("Invalid argument.");
       }
 
@@ -77,11 +77,11 @@ define(['underscore'], function(_) {
       var result = [];
       for (var i = 0; i < this._table.length; i++) {
         if (this._table[i]) {
-          if (_.isEmpty(result) || !_.last(result).equals(this._table[i])) {
+          if (result.length === 0 || !_.last(result).equals(this._table[i])) {
             result.push(this._table[i]);
           }
         }
-        if (_.size(result) >= count) {
+        if (result.length >= count) {
           break;
         }
       }
@@ -89,7 +89,7 @@ define(['underscore'], function(_) {
     },
 
     containsReference: function(reference) {
-      if (_.isNull(reference)) {
+      if (!reference) {
         throw new Error("Invalid argument.");
       }
 
@@ -107,7 +107,7 @@ define(['underscore'], function(_) {
     getStatus: function() {
       var self = this;
       return _.map(this._table, function(node) {
-        return _.isNull(node) ? null : node.toNodeInfo();
+        return !node ? null : node.toNodeInfo();
       });
     },
 
@@ -116,7 +116,7 @@ define(['underscore'], function(_) {
 
       return "[FingerTable]\n" + _.chain(this._table)
         .map(function(node, i) {
-          if (_.isNull(node)) {
+          if (!node) {
             return "";
           }
 
