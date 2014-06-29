@@ -1,4 +1,4 @@
-define(['underscore'], function(_) {
+define(['lodash'], function(_) {
   var Utils = {
     isNonemptyString: function(value) {
       return _.isString(value) && !_.isEmpty(value);

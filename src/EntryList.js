@@ -1,4 +1,4 @@
-define(['underscore', 'ID', 'Utils'], function(_, ID, Utils) {
+define(['lodash', 'ID', 'Utils'], function(_, ID, Utils) {
   var EntryList = function() {
     this._entries = {};
   };

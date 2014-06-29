@@ -1,4 +1,4 @@
-define(['underscore', 'PeerAgent', 'Connection', 'Utils'], function(_, PeerAgent, Connection, Utils) {
+define(['lodash', 'PeerAgent', 'Connection', 'Utils'], function(_, PeerAgent, Connection, Utils) {
   var ConnectionFactory = function(config, nodeFactory, callback) {
     var self = this;
 

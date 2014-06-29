@@ -1,4 +1,4 @@
-define(['underscore', 'Request', 'Response'], function(_, Request, Response) {
+define(['lodash', 'Request', 'Response'], function(_, Request, Response) {
   var Connection = function(conn, callbacks) {
     var self = this;
 

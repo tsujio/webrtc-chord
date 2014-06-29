@@ -1,4 +1,4 @@
-define(['underscore', 'ID'], function(_, ID) {
+define(['lodash', 'ID'], function(_, ID) {
   var Entry = function(id, value) {
     if (_.isNull(id) || _.isUndefined(value)) {
       throw new Error("Invalid argument.");

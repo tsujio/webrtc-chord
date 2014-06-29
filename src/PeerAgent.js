@@ -1,4 +1,4 @@
-define(['underscore', 'peerjs', 'Utils'], function(_, Peer, Utils) {
+define(['lodash', 'peerjs', 'Utils'], function(_, Peer, Utils) {
   var PeerAgent = function(config, callbacks) {
     var self = this;
 

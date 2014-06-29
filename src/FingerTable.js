@@ -1,4 +1,4 @@
-define(['underscore'], function(_) {
+define(['lodash'], function(_) {
   var FingerTable = function(localId, references) {
     if (!localId || !references) {
       throw new Error("Invalid arguments.");
@@ -6,10 +6,10 @@ define(['underscore'], function(_) {
 
     this._localId = localId;
     this._references = references;
-    this._table = _(this._localId.getLength()).times(function() { return null; });
+    this._table = _(this._localId.getLength()).times(function() { return null; }).value();
     this._powerOfTwos = _(this._localId.getLength()).times(function(i) {
       return localId.addPowerOfTwo(i);
-    });
+    }).value();
   };
 
   FingerTable.prototype = {
