@@ -38,6 +38,7 @@
     '../test/spec/IDSpec',
     '../test/spec/FingerTableSpec',
     '../test/spec/SuccessorListSpec',
+    '../test/spec/ReferenceListSpec',
   ];
 
   // Load Jasmine - This will still create all of the normal Jasmine browser globals unless `boot.js` is re-written to use the

@@ -1,6 +1,6 @@
 define(['underscore', 'FingerTable', 'SuccessorList'], function(_, FingerTable, SuccessorList) {
   var ReferenceList = function(localId, entries, config) {
-    if (_.isNull(localId) || _.isNull(entries)) {
+    if (!localId || !entries) {
       throw new Error("Invalid arguments.");
     }
 
@@ -13,7 +13,7 @@ define(['underscore', 'FingerTable', 'SuccessorList'], function(_, FingerTable, 
 
   ReferenceList.prototype = {
     addReference: function(reference) {
-      if (_.isNull(reference)) {
+      if (!reference) {
         throw new Error("Invalid argument.");
       }
 
@@ -26,7 +26,7 @@ define(['underscore', 'FingerTable', 'SuccessorList'], function(_, FingerTable, 
     },
 
     removeReference: function(reference) {
-      if (_.isNull(reference)) {
+      if (!reference) {
         throw new Error("Invalid argument.");
       }
 
@@ -49,38 +49,37 @@ define(['underscore', 'FingerTable', 'SuccessorList'], function(_, FingerTable, 
     },
 
     getClosestPrecedingNode: function(key) {
-      if (_.isNull(key)) {
+      if (!key) {
         throw new Error("Invalid argument.");
+      }
+
+      if (key.equals(this._localId)) {
+        return null;
       }
 
       var foundNodes = [];
 
       var closestNodeFT = this._fingerTable.getClosestPrecedingNode(key);
-      if (!_.isNull(closestNodeFT)) {
+      if (closestNodeFT) {
         foundNodes.push(closestNodeFT);
       }
       var closestNodeSL = this._successors.getClosestPrecedingNode(key);
-      if (!_.isNull(closestNodeSL)) {
+      if (closestNodeSL) {
         foundNodes.push(closestNodeSL);
       }
-      if (!_.isNull(this._predecessor) &&
+      if (this._predecessor &&
           key.isInInterval(this._predecessor.nodeId, this._localId)) {
         foundNodes.push(this._predecessor);
       }
 
-      foundNodes.sort(function(a, b) {
-          return a.nodeId.compareTo(b.nodeId);
-      });
-      var keyIndex = _.chain(foundNodes)
-        .map(function(node) { return node.nodeId; })
-        .sortedIndex(function(id) { return id.equals(key); })
-        .value();
-      var index = (_.size(foundNodes) + (keyIndex - 1)) % _.size(foundNodes);
-      var closestNode = foundNodes[index];
-      if (_.isNull(closestNode)) {
-        throw new Error("Closest node must not be null.");
+      if (foundNodes.length === 0) {
+        return null;
       }
-      return closestNode;
+
+      return _.chain(foundNodes)
+        .sort(function(a, b) { return key.sub(a.nodeId).compareTo(key.sub(b.nodeId)); })
+        .first()
+        .value();
     },
 
     getPredecessor: function() {
@@ -88,7 +87,7 @@ define(['underscore', 'FingerTable', 'SuccessorList'], function(_, FingerTable, 
     },
 
     addReferenceAsPredecessor: function(potentialPredecessor) {
-      if (_.isNull(potentialPredecessor)) {
+      if (!potentialPredecessor) {
         throw new Error("Invalid argument.");
       }
 
@@ -96,16 +95,16 @@ define(['underscore', 'FingerTable', 'SuccessorList'], function(_, FingerTable, 
         return;
       }
 
-      if (_.isNull(this._predecessor) ||
+      if (!this._predecessor ||
           potentialPredecessor.nodeId.isInInterval(this._predecessor.nodeId, this._localId)) {
-        this.setPredecessor(potentialPredecessor);
+        this._setPredecessor(potentialPredecessor);
       }
 
       this.addReference(potentialPredecessor);
     },
 
-    setPredecessor: function(potentialPredecessor) {
-      if (_.isNull(potentialPredecessor)) {
+    _setPredecessor: function(potentialPredecessor) {
+      if (!potentialPredecessor) {
         throw new Error("Invalid argument.");
       }
 
@@ -119,7 +118,7 @@ define(['underscore', 'FingerTable', 'SuccessorList'], function(_, FingerTable, 
 
       var formerPredecessor = this._predecessor;
       this._predecessor = potentialPredecessor;
-      if (!_.isNull(formerPredecessor)) {
+      if (formerPredecessor) {
         this.disconnectIfUnreferenced(formerPredecessor);
 
         var size = this._successors.getSize();
@@ -137,7 +136,7 @@ define(['underscore', 'FingerTable', 'SuccessorList'], function(_, FingerTable, 
     },
 
     disconnectIfUnreferenced: function(removedReference) {
-      if (_.isNull(removedReference)) {
+      if (!removedReference) {
         throw new Error("Invalid argument.");
       }
 
@@ -151,7 +150,7 @@ define(['underscore', 'FingerTable', 'SuccessorList'], function(_, FingerTable, 
     },
 
     containsReference: function(reference) {
-      if (_.isNull(reference)) {
+      if (!reference) {
         throw new Error("Invalid argurment.");
       }
 
@@ -164,14 +163,14 @@ define(['underscore', 'FingerTable', 'SuccessorList'], function(_, FingerTable, 
       return {
         successors: this._successors.getStatus(),
         fingerTable: this._fingerTable.getStatus(),
-        predecessor: _.isNull(this.getPredecessor()) ? null : this.getPredecessor().toNodeInfo()
+        predecessor: !this.getPredecessor() ? null : this.getPredecessor().toNodeInfo()
       };
     },
 
     toString: function() {
       return [
         this._successors.toString(),
-        "[Predecessor]\n" + (_.isNull(this.getPredecessor()) ? "" : this.getPredecessor().toString()) + "\n",
+        "[Predecessor]\n" + (!this.getPredecessor() ? "" : this.getPredecessor().toString()) + "\n",
         this._fingerTable.toString()
       ].join("\n") + "\n";
     }
