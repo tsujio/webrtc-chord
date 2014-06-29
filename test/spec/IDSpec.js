@@ -234,25 +234,25 @@ define(['ID'], function(ID) {
         var id3 = ID.fromHexString("00000000000000000000000000000000000000000000000000000000000000ff");
         var id4 = ID.fromHexString("ffffffffffffffffffffffffffffffff00000000000000000000000000000000");
 
-        expect(function() { id1.getIntervalInPowerOfTwoFrom(id1); }).toThrowError();
+        expect(id1.getIntervalInPowerOfTwoFrom(id1)).toBe(-Infinity);
         expect(id1.getIntervalInPowerOfTwoFrom(id2)).toBe(255);
         expect(id1.getIntervalInPowerOfTwoFrom(id3)).toBe(255);
         expect(id1.getIntervalInPowerOfTwoFrom(id4)).toBe(128);
 
         expect(id2.getIntervalInPowerOfTwoFrom(id1)).toBe(0);
-        expect(function() { id2.getIntervalInPowerOfTwoFrom(id2); }).toThrowError();
+        expect(id2.getIntervalInPowerOfTwoFrom(id2)).toBe(-Infinity);
         expect(id2.getIntervalInPowerOfTwoFrom(id3)).toBe(255);
         expect(id2.getIntervalInPowerOfTwoFrom(id4)).toBe(128);
 
         expect(id3.getIntervalInPowerOfTwoFrom(id1)).toBe(7);
         expect(id3.getIntervalInPowerOfTwoFrom(id2)).toBe(7);
-        expect(function() { id3.getIntervalInPowerOfTwoFrom(id3); }).toThrowError();
+        expect(id3.getIntervalInPowerOfTwoFrom(id3)).toBe(-Infinity);
         expect(id3.getIntervalInPowerOfTwoFrom(id4)).toBe(128);
 
         expect(id4.getIntervalInPowerOfTwoFrom(id1)).toBe(255);
         expect(id4.getIntervalInPowerOfTwoFrom(id2)).toBe(255);
         expect(id4.getIntervalInPowerOfTwoFrom(id3)).toBe(255);
-        expect(function() { id4.getIntervalInPowerOfTwoFrom(id4); }).toThrowError();
+        expect(id4.getIntervalInPowerOfTwoFrom(id4)).toBe(-Infinity);
       });
     });
   });

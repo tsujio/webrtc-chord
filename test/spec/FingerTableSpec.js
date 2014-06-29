@@ -50,44 +50,61 @@ define(['FingerTable', 'Node', 'ID'], function(FingerTable, Node, ID) {
 
     describe("#addReference", function() {
       it("should set entry at appropriate index", function() {
-        fingerTable.addReference(entries[0]);
-        _(128).times(function(i) {
-          expect(fingerTable._getEntry(i)).toEqualNode(entries[0]);
-        });
-        expect(fingerTable._getEntry(128)).toBeNull();
-
         fingerTable.addReference(entries[1]);
-        _(128).times(function(i) {
+        _.each(_.range(0, 192), function(i) {
+          expect(fingerTable._getEntry(i)).toBeNull();
+        });
+        _.each(_.range(192, 256), function(i) {
+          expect(fingerTable._getEntry(i)).toEqualNode(entries[1]);
+        });
+
+        fingerTable.addReference(entries[0]);
+        _.each(_.range(0, 128), function(i) {
+          expect(fingerTable._getEntry(i)).toBeNull();
+        });
+        _.each(_.range(128, 192), function(i) {
           expect(fingerTable._getEntry(i)).toEqualNode(entries[0]);
         });
-        _(64).times(function(i) {
-          expect(fingerTable._getEntry(128 + i)).toEqualNode(entries[1]);
+        _.each(_.range(192, 256), function(i) {
+          expect(fingerTable._getEntry(i)).toEqualNode(entries[1]);
         });
-        expect(fingerTable._getEntry(192)).toBeNull();
       });
 
       it("should replace old entry if more appropriate entry set", function() {
-        fingerTable.addReference(entries[1]);
-        _(192).times(function(i) {
-          expect(fingerTable._getEntry(i)).toEqualNode(entries[1]);
-        });
-        expect(fingerTable._getEntry(192)).toBeNull();
         fingerTable.addReference(entries[0]);
-        _(128).times(function(i) {
+        _.each(_.range(0, 128), function(i) {
+          expect(fingerTable._getEntry(i)).toBeNull();
+        });
+        _.each(_.range(128, 256), function(i) {
           expect(fingerTable._getEntry(i)).toEqualNode(entries[0]);
         });
-        _(64).times(function(i) {
-          expect(fingerTable._getEntry(128 + i)).toEqualNode(entries[1]);
-        });
-        expect(fingerTable._getEntry(192)).toBeNull();
 
-        expect(fingerTable._references.disconnectIfUnreferenced.calls.count()).toBe(128);
+        fingerTable.addReference(entries[1]);
+        _.each(_.range(0, 128), function(i) {
+          expect(fingerTable._getEntry(i)).toBeNull();
+        });
+        _.each(_.range(128, 192), function(i) {
+          expect(fingerTable._getEntry(i)).toEqualNode(entries[0]);
+        });
+        _.each(_.range(192, 256), function(i) {
+          expect(fingerTable._getEntry(i)).toEqualNode(entries[1]);
+        });
+
+        expect(fingerTable._references.disconnectIfUnreferenced.calls.count()).toBe(64);
+        expect(fingerTable._references.disconnectIfUnreferenced).toHaveBeenCalledWith(entries[0]);
       });
     });
 
     describe("#getClosestPrecedingNode", function() {
       it("should return closest preceding node of specified key", function() {
         fingerTable.addReference(entries[0]);
+        expect(fingerTable.getClosestPrecedingNode(ID.fromHexString(
+          "00000000000000000000000000000001ffffffffffffffffffffffffffffffff"))).toEqualNode(entries[0]);
+        expect(fingerTable.getClosestPrecedingNode(ID.fromHexString(
+          "0000000000000001ffffffffffffffffffffffffffffffff0000000000000000"))).toEqualNode(entries[0]);
+        expect(fingerTable.getClosestPrecedingNode(ID.fromHexString(
+          "00000000000000000000000000000000fffffffffffffffffffffffffffffffe"))).toBeNull();
+
         fingerTable.addReference(entries[1]);
 
         expect(fingerTable.getClosestPrecedingNode(ID.fromHexString(
@@ -106,14 +123,55 @@ define(['FingerTable', 'Node', 'ID'], function(FingerTable, Node, ID) {
 
         fingerTable.removeReference(entries[0]);
 
-        _(192).times(function(i) {
+        _.each(_.range(0, 192), function(i) {
+          expect(fingerTable._getEntry(i)).toBeNull();
+        });
+        _.each(_.range(192, 256), function(i) {
           expect(fingerTable._getEntry(i)).toEqualNode(entries[1]);
         });
-        expect(fingerTable._getEntry(192)).toBeNull();
+
+        fingerTable.removeReference(entries[1]);
+
+        _.each(_.range(0, 256), function(i) {
+          expect(fingerTable._getEntry(i)).toBeNull();
+        });
+
+        fingerTable.addReference(entries[0]);
+        fingerTable.addReference(entries[1]);
+
+        fingerTable.removeReference(entries[1]);
+
+        _.each(_.range(0, 128), function(i) {
+          expect(fingerTable._getEntry(i)).toBeNull();
+        });
+        _.each(_.range(128, 256), function(i) {
+          expect(fingerTable._getEntry(i)).toEqualNode(entries[0]);
+        });
+
+        fingerTable.removeReference(entries[0]);
+
+        _.each(_.range(0, 256), function(i) {
+          expect(fingerTable._getEntry(i)).toBeNull();
+        });
       });
     });
 
     describe("#getFirstFingerTableEntries", function() {
+      it("should return the first n entries", function() {
+        expect(fingerTable.getFirstFingerTableEntries()).toEqual([]);
+
+        fingerTable.addReference(entries[0]);
+        expect(fingerTable.getFirstFingerTableEntries().length).toBe(1);
+        expect(fingerTable.getFirstFingerTableEntries()[0]).toEqualNode(entries[0]);
+
+        fingerTable.addReference(entries[1]);
+        expect(fingerTable.getFirstFingerTableEntries().length).toBe(2);
+        expect(fingerTable.getFirstFingerTableEntries()[0]).toEqualNode(entries[0]);
+        expect(fingerTable.getFirstFingerTableEntries()[1]).toEqualNode(entries[1]);
+
+        expect(fingerTable.getFirstFingerTableEntries(1).length).toBe(1);
+        expect(fingerTable.getFirstFingerTableEntries()[0]).toEqualNode(entries[0]);
+      });
     });
 
     describe("#containsReference", function() {
@@ -122,6 +180,11 @@ define(['FingerTable', 'Node', 'ID'], function(FingerTable, Node, ID) {
 
         expect(fingerTable.containsReference(entries[0])).toBeTruthy();
         expect(fingerTable.containsReference(entries[1])).toBeFalsy();
+
+        fingerTable.addReference(entries[1]);
+
+        expect(fingerTable.containsReference(entries[0])).toBeTruthy();
+        expect(fingerTable.containsReference(entries[1])).toBeTruthy();
       });
     });
   });

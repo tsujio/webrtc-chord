@@ -54,18 +54,20 @@ define(['underscore'], function(_) {
         throw new Error("Invalid argument.");
       }
 
-      for (var i = 0; i < _.size(this._remoteNodes); i++) {
-        var startOfInterval = this._localId.addPowerOfTwo(i);
-        if (!startOfInterval.isInInterval(this._localId, node.nodeId)) {
-          break;
-        }
+      if (node.nodeId.equals(this._localId)) {
+        return;
+      }
 
+      var index = node.nodeId.getIntervalInPowerOfTwoFrom(this._localId);
+      for (var i = index + 1; i < this._localId.getLength(); i++) {
         if (_.isNull(this._getEntry(i))) {
           this._setEntry(i, node);
-        } else if (node.nodeId.isInInterval(this._localId, this._getEntry(i).nodeId)) {
+        } else if (node.nodeId.isInInterval(this._getEntry(i).nodeId, this._localId.addPowerOfTwo(i))) {
           var oldEntry = this._getEntry(i);
           this._setEntry(i, node);
           this._references.disconnectIfUnreferenced(oldEntry);
+        } else {
+          break;
         }
       }
     },
@@ -75,13 +77,12 @@ define(['underscore'], function(_) {
         throw new Error("Invalid argument.");
       }
 
-      for (var i = _.size(this._remoteNodes) - 1; i >= 0; i--) {
-        if (!_.isNull(this._getEntry(i)) &&
-            this._getEntry(i).nodeId.isInInterval(this._localId, key)) {
-          return this._getEntry(i);
-        }
+      if (key.equals(this._localId)) {
+        return null;
       }
-      return null;
+
+      var index = key.getIntervalInPowerOfTwoFrom(this._localId);
+      return this._getEntry(index);
     },
 
     removeReference: function(node) {
@@ -91,35 +92,28 @@ define(['underscore'], function(_) {
         throw new Error("Invalid argument.");
       }
 
-      var referenceForReplacement = null;
-      for (var i = _.size(this._remoteNodes) - 1; i >= 0; i--) {
-        var n = this._getEntry(i);
-        if (node.equals(n)) {
-          break;
-        }
-        if (!_.isNull(n)) {
-          referenceForReplacement = n;
-        }
+      if (node.nodeId.equals(this._localId)) {
+        return;
       }
 
-      _.each(this._remoteNodes, function(n, i) {
-        if (node.equals(self._getEntry(i))) {
-          if (_.isNull(referenceForReplacement)) {
-            self._unsetEntry(i);
-          } else {
-            self._setEntry(i, referenceForReplacement);
-          }
+      var index = node.nodeId.getIntervalInPowerOfTwoFrom(this._localId);
+      var replacingNode = this._getEntry(index);
+      for (var i = index + 1; i < this._localId.getLength(); i++) {
+        if (!node.equals(this._getEntry(i))) {
+          break;
         }
-      });
 
-      _.chain(this._references.getSuccessors())
-        .reject(function(s) { return s.equals(node); })
-        .each(function(s) { self.addReference(s); });
+        if (_.isNull(replacingNode)) {
+          this._unsetEntry(i);
+        } else {
+          this._setEntry(i, replacingNode);
+        }
+      }
     },
 
     getFirstFingerTableEntries: function(count) {
       var result = [];
-      for (var i = 0; i < _.size(this._remoteNodes); i++) {
+      for (var i = 0; i < this._localId.getLength(); i++) {
         if (!_.isNull(this._getEntry(i))) {
           if (_.isEmpty(result) || !_.last(result).equals(this._getEntry(i))) {
             result.push(this._getEntry(i));
@@ -137,9 +131,15 @@ define(['underscore'], function(_) {
         throw new Error("Invalid argument.");
       }
 
-      return _.some(this._remoteNodes, function(node) {
-        return reference.equals(node);
-      });
+      if (reference.nodeId.equals(this._localId)) {
+        return false;
+      }
+
+      var index = reference.nodeId.getIntervalInPowerOfTwoFrom(this._localId);
+      if (index === this._localId.getLength() - 1) {
+        return false;
+      }
+      return reference.equals(this._getEntry(index + 1));
     },
 
     getStatus: function() {

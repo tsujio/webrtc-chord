@@ -113,14 +113,14 @@ define(['underscore', 'cryptojs', 'Utils'], function(_, CryptoJS, Utils) {
 
     getIntervalInPowerOfTwoFrom: function(id) {
       if (this.equals(id)) {
-        throw new Error("Invalid argument.");
+        return -Infinity;
       }
 
       var diff = this.sub(id);
       for (var i = 0; i < this.getLength(); i++) {
         if (ID.minId.addPowerOfTwo(i).compareTo(diff) > 0) {
           if (i === 0) {
-            throw new Error("Unknown situation.");
+            return -Infinity;
           }
           break;
         }
