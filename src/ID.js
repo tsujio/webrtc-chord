@@ -5,7 +5,7 @@ define(['underscore', 'cryptojs', 'Utils'], function(_, CryptoJS, Utils) {
         throw new Error("Invalid argument.");
       }
     });
-    if (_.size(bytes) !== ID._BYTE_SIZE) {
+    if (bytes.length !== ID._BYTE_SIZE) {
       throw new Error("Invalid argument.");
     }
 
@@ -14,7 +14,7 @@ define(['underscore', 'cryptojs', 'Utils'], function(_, CryptoJS, Utils) {
       var str = b.toString(16);
       return b < 0x10 ? "0" + str : str;
     }).join("");
-    this._bitLength = _.size(this._bytes) * 8;
+    this._bitLength = this._bytes.length * 8;
   };
 
   ID._BYTE_SIZE = 32;
@@ -37,7 +37,7 @@ define(['underscore', 'cryptojs', 'Utils'], function(_, CryptoJS, Utils) {
       throw new Error("Invalid argument.");
     }
 
-    return _(Math.floor(_.size(str) / 2)).times(function(i) {
+    return _(Math.floor(str.length / 2)).times(function(i) {
       return parseInt(str.substr(i * 2, 2), 16);
     });
   };
@@ -49,7 +49,7 @@ define(['underscore', 'cryptojs', 'Utils'], function(_, CryptoJS, Utils) {
   ID._addInBytes = function(bytes1, bytes2) {
     var copy = _.clone(bytes1);
     var carry = 0;
-    for (var i = _.size(bytes1) - 1; i >= 0; i--) {
+    for (var i = bytes1.length - 1; i >= 0; i--) {
       copy[i] += (bytes2[i] + carry);
       if (copy[i] < 0) {
         carry = -1;
@@ -64,7 +64,7 @@ define(['underscore', 'cryptojs', 'Utils'], function(_, CryptoJS, Utils) {
 
   ID.prototype = {
     isInInterval: function(fromId, toId) {
-      if (_.isNull(fromId) || _.isNull(toId)) {
+      if (!fromId || !toId) {
         throw new Error("Invalid arguments.");
       }
 
@@ -81,15 +81,12 @@ define(['underscore', 'cryptojs', 'Utils'], function(_, CryptoJS, Utils) {
     },
 
     addPowerOfTwo: function(powerOfTwo) {
-      if (!_.isNumber(powerOfTwo)) {
-        throw new Error("Invalid argument.");
-      }
-      if (powerOfTwo < 0 || powerOfTwo >= this.getLength()) {
+      if (powerOfTwo < 0 || powerOfTwo >= this._bitLength) {
         throw new Error("Power of two out of index.");
       }
 
       var copy = _.clone(this._bytes);
-      var indexOfBytes = _.size(this._bytes) - 1 - Math.floor(powerOfTwo / 8);
+      var indexOfBytes = this._bytes.length - 1 - Math.floor(powerOfTwo / 8);
       var valueToAdd = [1, 2, 4, 8, 16, 32, 64, 128][powerOfTwo % 8];
       for (var i = indexOfBytes; i >= 0; i--) {
         copy[i] += valueToAdd;
@@ -117,7 +114,7 @@ define(['underscore', 'cryptojs', 'Utils'], function(_, CryptoJS, Utils) {
       }
 
       var diff = this.sub(id);
-      for (var i = 0; i < this.getLength(); i++) {
+      for (var i = 0; i < this._bitLength; i++) {
         if (ID.minId.addPowerOfTwo(i).compareTo(diff) > 0) {
           if (i === 0) {
             return -Infinity;
@@ -129,10 +126,6 @@ define(['underscore', 'cryptojs', 'Utils'], function(_, CryptoJS, Utils) {
     },
 
     compareTo: function(id) {
-      if (this.getLength() !== id.getLength()) {
-        throw new Error("Invalid argument.");
-      }
-
       for (var i = 0; i < ID._BYTE_SIZE; i++) {
         if (this._bytes[i] < id._bytes[i]) {
           return -1;
