@@ -7,6 +7,9 @@ define(['underscore'], function(_) {
     this._localId = localId;
     this._references = references;
     this._remoteNodes = _(this._localId.getLength()).times(function() { return null; });
+    this._powerOfTwos = _(this._localId.getLength()).times(function(i) {
+      return localId.addPowerOfTwo(i);
+    });
   };
 
   FingerTable.prototype = {
@@ -62,7 +65,7 @@ define(['underscore'], function(_) {
       for (var i = index + 1; i < this._localId.getLength(); i++) {
         if (_.isNull(this._getEntry(i))) {
           this._setEntry(i, node);
-        } else if (node.nodeId.isInInterval(this._getEntry(i).nodeId, this._localId.addPowerOfTwo(i))) {
+        } else if (node.nodeId.isInInterval(this._getEntry(i).nodeId, this._powerOfTwos[i])) {
           var oldEntry = this._getEntry(i);
           this._setEntry(i, node);
           this._references.disconnectIfUnreferenced(oldEntry);
