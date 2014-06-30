@@ -20,7 +20,7 @@ define(['ReferenceList', 'Node', 'ID'], function(ReferenceList, Node, ID) {
 
       nodes = _(4).times(function() {
         return new Node({peerId: "dummy", nodeId: "dummy"}, null, null, null, {});
-      });
+      }).value();
       nodes[0].nodeId = ID.fromHexString("00000000000000000000000000000000ffffffffffffffffffffffffffffffff");
       nodes[1].nodeId = ID.fromHexString("0000000000000000ffffffffffffffffffffffffffffffff0000000000000000");
       nodes[2].nodeId = ID.fromHexString("ffffffffffffffffffffffffffffffff00000000000000000000000000000000");

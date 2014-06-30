@@ -9,7 +9,7 @@
       'jasmine-html': '../test/lib/jasmine-2.0.0/jasmine-html',
       'boot': '../test/lib/jasmine-2.0.0/boot',
 
-      underscore: 'http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min',
+      lodash: 'http://cdnjs.cloudflare.com/ajax/libs/lodash.js/2.4.1/lodash.min',
       cryptojs: 'http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/sha256'
     },
 
