@@ -8,7 +8,7 @@
     var calculateCoordinates = function(nodeId) {
       var bytes = _(Math.floor(_.size(nodeId) / 2)).times(function(i) {
         return parseInt(nodeId.substr(i * 2, 2), 16);
-      });
+      }).value();
       var ratio = _.chain(bytes)
         .map(function(b) { return b / 0xff;})
         .reduceRight(function(a, b) { return (a >> 8) + b; }, 0)
