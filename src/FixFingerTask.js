@@ -1,4 +1,4 @@
-define(['underscore', 'Utils'], function(_, Utils) {
+define(['lodash', 'Utils'], function(_, Utils) {
   var FixFingerTask = function(localNode, references) {
     this._localNode = localNode;
     this._references = references;

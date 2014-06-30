@@ -2,7 +2,7 @@
   baseUrl: '../src',
 
   paths: {
-    underscore: 'lib/underscore',
+    lodash: 'lib/lodash',
     peerjs: 'lib/peerjs',
     cryptojs: 'lib/cryptojs'
   },

@@ -1,4 +1,4 @@
-define(['underscore', 'cryptojs', 'Utils'], function(_, CryptoJS, Utils) {
+define(['lodash', 'cryptojs', 'Utils'], function(_, CryptoJS, Utils) {
   var ID = function(bytes) {
     _.each(bytes, function(b) {
       if (_.isNaN(b) || !_.isNumber(b) || b < 0x00 || 0xff < b) {
@@ -39,7 +39,7 @@ define(['underscore', 'cryptojs', 'Utils'], function(_, CryptoJS, Utils) {
 
     return _(Math.floor(str.length / 2)).times(function(i) {
       return parseInt(str.substr(i * 2, 2), 16);
-    });
+    }).value();
   };
 
   ID.fromHexString = function(str) {
@@ -151,11 +151,11 @@ define(['underscore', 'cryptojs', 'Utils'], function(_, CryptoJS, Utils) {
 
   ID.minId = new ID(_(ID._BYTE_SIZE).times(function() {
     return 0x00;
-  }));
+  }).value());
 
   ID.maxId = new ID(_(ID._BYTE_SIZE).times(function() {
     return 0xff;
-  }));
+  }).value());
 
   return ID;
 });

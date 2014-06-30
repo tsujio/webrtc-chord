@@ -1,4 +1,4 @@
-define(['underscore', 'LocalNode', 'Utils'], function(_, LocalNode, Utils) {
+define(['lodash', 'LocalNode', 'Utils'], function(_, LocalNode, Utils) {
   var Chord = function(config) {
     if (!_.isObject(config)) {
       throw new Error("Invalid argument.");

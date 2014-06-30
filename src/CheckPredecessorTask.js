@@ -1,4 +1,4 @@
-define(['underscore', 'Utils'], function(_, Utils) {
+define(['lodash', 'Utils'], function(_, Utils) {
   var CheckPredecessorTask = function(references) {
     this._references = references;
     this._timer = null;

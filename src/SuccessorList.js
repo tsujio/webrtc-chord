@@ -1,4 +1,4 @@
-define(['underscore', 'Utils'], function(_, Utils) {
+define(['lodash', 'Utils'], function(_, Utils) {
   var SuccessorList = function(localId, entries, references, config) {
     if (!localId || !entries || !references) {
       throw new Error("Invalid argument.");

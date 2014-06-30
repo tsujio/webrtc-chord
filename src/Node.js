@@ -1,4 +1,4 @@
-define(['underscore', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Request, Entry, Utils) {
+define(['lodash', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Request, Entry, Utils) {
   var Node = function(nodeInfo, nodeFactory, connectionFactory, requestHandler, config) {
     if (!Node.isValidNodeInfo(nodeInfo)) {
       throw new Error("Invalid arguments.");

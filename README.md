@@ -37,13 +37,13 @@ r.js.cmd -o bin\build.js
 
 ## Include libraries
 webrtc-chord depends on the following libraries.
-* [underscore.js](http://underscorejs.org/)
+* [Lo-Dash](http://lodash.com/)
 * [sha256.js of crypto-js libraries](https://code.google.com/p/crypto-js/)
 * [PeerJS](https://github.com/peers/peerjs)
 
 So you must include them **before** include webrtc-chord.js as the following.
 ```html
-<script type="text/javascript" src="path/to/underscore.js"></script>
+<script type="text/javascript" src="path/to/lodash.js"></script>
 <script type="text/javascript" src="path/to/sha256.js"></script>
 <script type="text/javascript" src="path/to/peer.js"></script>
 <script type="text/javascript" src="path/to/webrtc-chord.js"></script>

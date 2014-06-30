@@ -1,4 +1,4 @@
-define(['underscore', 'ID', 'Response', 'Entry', 'Utils'], function(_, ID, Response, Entry, Utils) {
+define(['lodash', 'ID', 'Response', 'Entry', 'Utils'], function(_, ID, Response, Entry, Utils) {
   var RequestHandler = function(localNode, nodeFactory) {
     this._localNode = localNode;
     this._nodeFactory = nodeFactory;

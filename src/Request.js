@@ -1,4 +1,4 @@
-define(['underscore', 'cryptojs', 'Response', 'Utils'], function(_, CryptoJS, Response, Utils) {
+define(['lodash', 'cryptojs', 'Response', 'Utils'], function(_, CryptoJS, Response, Utils) {
   var Request = function(method, params, requestId, timestamp) {
     if (!Utils.isNonemptyString(method) || !_.isObject(params) ||
         !Utils.isNonemptyString(requestId) || !_.isNumber(timestamp)) {

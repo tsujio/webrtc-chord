@@ -1,4 +1,4 @@
-define(['underscore', 'FingerTable', 'SuccessorList'], function(_, FingerTable, SuccessorList) {
+define(['lodash', 'FingerTable', 'SuccessorList'], function(_, FingerTable, SuccessorList) {
   var ReferenceList = function(localId, entries, config) {
     if (!localId || !entries) {
       throw new Error("Invalid arguments.");

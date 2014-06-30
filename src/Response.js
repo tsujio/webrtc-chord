@@ -1,4 +1,4 @@
-define(['underscore', 'Utils'], function(_, Utils) {
+define(['lodash', 'Utils'], function(_, Utils) {
   var Response = function(status, method, result, requestId, timestamp) {
     if (!Utils.isNonemptyString(status) ||
         !Utils.isNonemptyString(method) ||
