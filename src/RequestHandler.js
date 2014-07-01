@@ -16,16 +16,22 @@ define(['lodash', 'ID', 'Response', 'Entry', 'Utils'], function(_, ID, Response,
         }
 
         var key = ID.fromHexString(request.params.key);
-        this._localNode.findSuccessor(key, function(successor, error) {
+        this._localNode.findSuccessorIterative(key, function(status, node, error) {
           if (error) {
             console.log(error);
             self._sendFailureResponse(e.message, request, callback);
             return;
           }
 
-          self._sendSuccessResponse({
-            successorNodeInfo: successor.toNodeInfo()
-          }, request, callback);
+          if (status === 'SUCCESS') {
+            self._sendSuccessResponse({
+              successorNodeInfo: node.toNodeInfo()
+            }, request, callback);
+          } else if (status === 'REDIRECT') {
+            self._sendRedirectResponse({
+              redirectNodeInfo: node.toNodeInfo()
+            }, request, callback);
+          }
         });
         break;
 
@@ -196,12 +202,20 @@ define(['lodash', 'ID', 'Response', 'Entry', 'Utils'], function(_, ID, Response,
     },
 
     _sendSuccessResponse: function(result, request, callback) {
+      this._sendResponse('SUCCESS', result, request, callback);
+    },
+
+    _sendRedirectResponse: function(result, request, callback) {
+      this._sendResponse('REDIRECT', result, request, callback);
+    },
+
+    _sendResponse: function(status, result, request, callback) {
       var self = this;
 
       var response;
       try {
-        response = Response.create('SUCCESS', result, request);
-      } catch (e){
+        response = Response.create(status, result, request);
+      } catch (e) {
         this._sendFailureResponse(e.message, request, callback);
         return;
       }

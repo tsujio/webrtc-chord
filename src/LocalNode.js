@@ -291,6 +291,38 @@ define([
       });
     },
 
+    findSuccessorIterative: function(key, callback) {
+      var self = this;
+
+      if (_.isNull(key)) {
+        callback('FAILED', null, new Error("Invalid argument."));
+      }
+
+      var successor = this._references.getSuccessor();
+      if (_.isNull(successor)) {
+        callback('SUCCESS', this);
+        return;
+      }
+
+      if (key.isInInterval(this.nodeId, successor.nodeId) ||
+          key.equals(successor.nodeId)) {
+        successor.ping(function(error) {
+          if (error) {
+            console.log(error);
+            self._references.removeReference(successor);
+            self.findSuccessor(key, callback);
+            return;
+          }
+
+          callback('SUCCESS', successor);
+        });
+        return;
+      }
+
+      var closestPrecedingNode = this._references.getClosestPrecedingNode(key);
+      callback('REDIRECT', closestPrecedingNode);
+    },
+
     notifyAndCopyEntries: function(potentialPredecessor, callback) {
       var self = this;
 
