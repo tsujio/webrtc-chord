@@ -118,7 +118,7 @@ define(['lodash', 'PeerAgent', 'Connection', 'Utils'], function(_, PeerAgent, Co
         return;
       }
 
-      if (this._peerAgent.isWaitingOpeningConnection()) {
+      if (this._peerAgent.isWaitingForOpeningConnection()) {
         return;
       }
 

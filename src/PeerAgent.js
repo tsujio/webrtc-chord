@@ -23,7 +23,6 @@ define(['lodash', 'peerjs', 'Utils'], function(_, Peer, Utils) {
     this._config = config;
     this._callbacks = callbacks;
     this._waitingTimer = null;
-    this.connect = _.throttle(this.connect, config.connectRateLimit);
 
     var onPeerSetup = _.once(callbacks.onPeerSetup);
 
@@ -52,7 +51,7 @@ define(['lodash', 'peerjs', 'Utils'], function(_, Peer, Utils) {
 
       var match = error.message.match(/Could not connect to peer (\w+)/);
       if (match) {
-        if (!self.isWaitingOpeningConnection()) {
+        if (!self.isWaitingForOpeningConnection()) {
           return;
         }
 
@@ -73,6 +72,10 @@ define(['lodash', 'peerjs', 'Utils'], function(_, Peer, Utils) {
     connect: function(peerId) {
       var self = this;
 
+      if (this.isWaitingForOpeningConnection()) {
+        throw new Error("Invalid state.");
+      }
+
       var conn = this._peer.connect(peerId);
       if (!conn) {
         var error = new Error("Failed to open connection to " + peerId + ".");
@@ -81,7 +84,7 @@ define(['lodash', 'peerjs', 'Utils'], function(_, Peer, Utils) {
       }
 
       this._waitingTimer = setTimeout(function() {
-        if (!self.isWaitingOpeningConnection()) {
+        if (!self.isWaitingForOpeningConnection()) {
           return;
         }
 
@@ -94,7 +97,8 @@ define(['lodash', 'peerjs', 'Utils'], function(_, Peer, Utils) {
       conn.on('open', function() {
         Utils.debug("Connection to", conn.peer, "opened.");
 
-        if (!self.isWaitingOpeningConnection()) {
+        if (!self.isWaitingForOpeningConnection()) {
+          console.log("Unexpected opening connection.");
           conn.close();
           return;
         }
@@ -106,7 +110,7 @@ define(['lodash', 'peerjs', 'Utils'], function(_, Peer, Utils) {
       });
     },
 
-    isWaitingOpeningConnection: function() {
+    isWaitingForOpeningConnection: function() {
       return !_.isNull(this._waitingTimer);
     },
 
