@@ -1,7 +1,8 @@
 define(['lodash', 'cryptojs', 'Response', 'Utils'], function(_, CryptoJS, Response, Utils) {
   var Request = function(version, method, params, requestId, timestamp) {
-    if (version !== Utils.version) {
-      console.log("Your version: " + Utils.version + " is not equal to remote's version: " + version);
+    if (version[0] !== Utils.version[0]) {
+      throw new Error("Cannot communicate with version " + version.join('.') +
+                      " (your version is " + Utils.version.join('.') +")");
     }
 
     if (!Utils.isNonemptyString(method) || !_.isObject(params) ||

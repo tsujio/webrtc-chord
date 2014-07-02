@@ -60,6 +60,7 @@ define([
         try {
           response = Response.fromJson(data);
         } catch (e) {
+          console.log(e);
           return;
         }
         this._callbacks.responseReceived(this, response);
@@ -68,6 +69,7 @@ define([
         try {
           request = Request.fromJson(data);
         } catch (e) {
+          console.log(e);
           return;
         }
         this._callbacks.requestReceived(this, request);

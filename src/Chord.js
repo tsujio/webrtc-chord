@@ -5,7 +5,7 @@ define(['lodash', 'LocalNode', 'Utils'], function(_, LocalNode, Utils) {
     }
     Utils.enableDebugLog(config.debug);
 
-    this.version = Utils.version;
+    this.version = Utils.version.join('.');
     this._config = config;
     this._localNode = null;
     this.onentriesinserted = function(entries) { ; };
