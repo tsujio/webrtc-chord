@@ -76,7 +76,9 @@ define(['lodash', 'peerjs', 'Utils'], function(_, Peer, Utils) {
         throw new Error("Invalid state.");
       }
 
-      var conn = this._peer.connect(peerId);
+      var conn = this._peer.connect(peerId, {
+        serialization: 'json'
+      });
       if (!conn) {
         var error = new Error("Failed to open connection to " + peerId + ".");
         this._callbacks.onConnectionOpened(peerId, null, error);
