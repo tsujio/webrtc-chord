@@ -3,6 +3,15 @@ webrtc-chord
 
 An implementation of Chord, a protocol of Distributed Hash Table, using WebRTC.
 
+## Release
+Date       | Version
+---------- | -------
+2014/07/01 | v0.1.0
+
+Note that releases of different major versions are not compatible.
+
+The next release v1.0.0 being developed on master.
+
 ## Requirements
 webrtc-chord requires [WebRTC](http://www.webrtc.org/), so check if your
 browser supports WebRTC.
