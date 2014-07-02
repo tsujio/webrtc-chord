@@ -96,7 +96,8 @@ define([
                         "(remote peer ID:", node.getPeerId(), ", attempts:", attempts, ").");
 
             if (attempts === 0) {
-              callback(null, null, new Error("Reached maximum number of attempts of NOTIFY_AND_COPY."));
+              console.log("Reached maximum number of attempts of NOTIFY_AND_COPY.");
+              callback([], []);
               return;
             }
 
