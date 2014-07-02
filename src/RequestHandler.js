@@ -132,12 +132,19 @@ define(['lodash', 'ID', 'Response', 'Entry', 'Utils'], function(_, ID, Response,
           self._sendFailureResponse(e.message, request, callback);;
           return;
         }
-        self._localNode.insertEntry(entry, function(error) {
+        self._localNode.insertEntryIterative(entry, function(status, node, error) {
           if (error) {
             console.log("Failed to insert entry:", error);
             self._sendFailureResponse("Unknown error.", request, callback);
-          } else {
+            return;
+          }
+
+          if (status === 'SUCCESS') {
             self._sendSuccessResponse({}, request, callback);
+          } else if (status === 'REDIRECT') {
+            self._sendRedirectResponse({
+              redirectNodeInfo: node.toNodeInfo()
+            }, request, callback);
           }
         });
         break;
@@ -150,13 +157,20 @@ define(['lodash', 'ID', 'Response', 'Entry', 'Utils'], function(_, ID, Response,
           self._sendFailureResponse(e.message, request, callback);
           return;
         }
-        self._localNode.retrieveEntries(id, function(entries, error) {
+        self._localNode.retrieveEntriesIterative(id, function(status, entries, node, error) {
           if (error) {
             console.log("Failed to retrieve entries:", error);
             self._sendFailureResponse("Unknown error.", request, callback);
-          } else {
+            return;
+          }
+
+          if (status === 'SUCCESS') {
             self._sendSuccessResponse({
               entries: _.invoke(entries, 'toJson')
+            }, request, callback);
+          } else if (status === 'REDIRECT') {
+            self._sendRedirectResponse({
+              redirectNodeInfo: node.toNodeInfo()
             }, request, callback);
           }
         });
@@ -170,12 +184,19 @@ define(['lodash', 'ID', 'Response', 'Entry', 'Utils'], function(_, ID, Response,
           self._sendFailureResponse(e.message, request, callback);
           return;
         }
-        self._localNode.removeEntry(entry, function(error) {
+        self._localNode.removeEntryIterative(entry, function(status, node, error) {
           if (error) {
             console.log("Failed to remove entry:", error);
             self._sendFailureResponse("Unknown error.", request, callback);
-          } else {
+            return;
+          }
+
+          if (status === 'SUCCESS') {
             self._sendSuccessResponse({}, request, callback);
+          } else if (status === 'REDIRECT') {
+            self._sendRedirectResponse({
+              redirectNodeInfo: node.toNodeInfo()
+            }, request, callback);
           }
         });
         break;

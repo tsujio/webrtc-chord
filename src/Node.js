@@ -155,11 +155,26 @@ define(['lodash', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Request, E
     },
 
     insertEntry: function(entry, callback) {
+      var self = this;
+
       this._sendRequest('INSERT_ENTRY', {
         entry: entry.toJson()
       }, {
         success: function(result) {
           callback();
+        },
+
+        redirect: function(result) {
+          self._nodeFactory.create(result.redirectNodeInfo, function(node, error) {
+            if (error) {
+              callback(error);
+              return;
+            }
+
+            Utils.debug("[insertEntry] redirected to " + node.getPeerId());
+
+            node.insertEntry(entry, callback);
+          });
         },
 
         error: function(error) {
@@ -193,6 +208,19 @@ define(['lodash', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Request, E
           callback(entries);
         },
 
+        redirect: function(result) {
+          self._nodeFactory.create(result.redirectNodeInfo, function(node, error) {
+            if (error) {
+              callback(null, error);
+              return;
+            }
+
+            Utils.debug("[retrieveEntries] redirected to " + node.getPeerId());
+
+            node.retrieveEntries(id, callback);
+          });
+        },
+
         error: function(error) {
           callback(null, error);
         }
@@ -200,11 +228,26 @@ define(['lodash', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Request, E
     },
 
     removeEntry: function(entry, callback) {
+      var self = this;
+
       this._sendRequest('REMOVE_ENTRY', {
         entry: entry.toJson()
       }, {
         success: function(result) {
           callback();
+        },
+
+        redirect: function(result) {
+          self._nodeFactory.create(result.redirectNodeInfo, function(node, error) {
+            if (error) {
+              callback(error);
+              return;
+            }
+
+            Utils.debug("[removeEntry] redirected to " + node.getPeerId());
+
+            node.removeEntry(entry, callback);
+          });
         },
 
         error: function(error) {

@@ -191,33 +191,14 @@ define([
         callback(e);
         return;
       }
-      this.findSuccessor(id, function(successor, error) {
-        if (error) {
-          callback(error);
-          return;
-        }
 
-        successor.insertEntry(entry, callback);
-      });
+      this.insertEntry(entry, callback);
     },
 
     retrieve: function(key, callback) {
       var id = ID.create(key);
-      this.findSuccessor(id, function(successor, error) {
-        if (error) {
-          callback(null, error);
-          return;
-        }
 
-        successor.retrieveEntries(id, function(entries, error) {
-          if (error) {
-            callback(null, error);
-            return;
-          }
-
-          callback(_.map(entries, function(entry) { return entry.value; }));
-        });
-      });
+      this.retrieveEntries(id, callback);
     },
 
     remove: function(key, value, callback) {
@@ -229,14 +210,8 @@ define([
         callback(e);
         return;
       }
-      this.findSuccessor(id, function(successor, error) {
-        if (error) {
-          callback(error);
-          return;
-        }
 
-        successor.removeEntry(entry, callback);
-      });
+      this.removeEntry(entry, callback);
     },
 
     
@@ -386,9 +361,36 @@ define([
     insertEntry: function(entry, callback) {
       var self = this;
 
-      if (!_.isNull(this._references.getPredecessor()) &&
+      if (this._references.getPredecessor() &&
           !entry.id.isInInterval(this._references.getPredecessor().nodeId, this.nodeId)) {
-        this._references.getPredecessor().insertEntry(entry, callback); 
+        this.findSuccessor(entry.id, function(successor, error) {
+          if (error) {
+            callback(error);
+            return;
+          }
+
+          successor.insertEntry(entry, callback);
+        });
+        return;
+      }
+
+      this._entries.add(entry);
+
+      _.defer(function() {
+        self._chord.onentriesinserted([entry.toJson()]);
+      });
+
+      _.each(this._references.getSuccessors(), function(successor) {
+        successor.insertReplicas([entry]);
+      });
+    },
+
+    insertEntryIterative: function(entry, callback) {
+      var self = this;
+
+      if (this._references.getPredecessor() &&
+          !entry.id.isInInterval(this._references.getPredecessor().nodeId, this.nodeId)) {
+        callback('REDIRECT', this._references.getPredecessor());
         return;
       }
 
@@ -402,30 +404,78 @@ define([
         successor.insertReplicas([entry]);
       });
 
-      callback();
+      callback('SUCCESS');
     },
 
     retrieveEntries: function(id, callback) {
-      if (this._entries.has(id)) {
+      if (this._entries.has(id) ||
+          !this._references.getPredecessor() ||
+          id.isInInterval(this._references.getPredecessor().nodeId, this.nodeId)) {
         callback(this._entries.getEntries(id));
         return;
       }
 
-      if (!_.isNull(this._references.getPredecessor()) &&
-          !id.isInInterval(this._references.getPredecessor().nodeId, this.nodeId)) {
-        this._references.getPredecessor().retrieveEntries(id, callback);
+      this.findSuccessor(id, function(successor, error) {
+        if (error) {
+          callback(null, error);
+          return;
+        }
+
+        successor.retrieveEntries(id, function(entries, error) {
+          if (error) {
+            callback(null, error);
+            return;
+          }
+
+          callback(_.map(entries, function(entry) { return entry.value; }));
+        });
+      });
+    },
+
+    retrieveEntriesIterative: function(id, callback) {
+      if (this._entries.has(id) ||
+          !this._references.getPredecessor() ||
+          id.isInInterval(this._references.getPredecessor().nodeId, this.nodeId)) {
+        callback('SUCCESS', this._entries.getEntries(id));
         return;
       }
 
-      callback(this._entries.getEntries(id));
+      callback('REDIRECT', null, this._references.getPredecessor());
     },
 
     removeEntry: function(entry, callback) {
       var self = this;
 
-      if (!_.isNull(this._references.getPredecessor()) &&
+      if (this._references.getPredecessor() &&
           !entry.id.isInInterval(this._references.getPredecessor().nodeId, this.nodeId)) {
-        this._references.getPredecessor().removeEntry(entry, callback);
+        this.findSuccessor(entry.id, function(successor, error) {
+          if (error) {
+            callback(error);
+            return;
+          }
+
+          successor.removeEntry(entry, callback);
+        });
+        return;
+      }
+
+      this._entries.remove(entry);
+
+      _.defer(function() {
+        self._chord.onentriesremoved([entry.toJson()]);
+      });
+
+      _.each(this._references.getSuccessors(), function(successor) {
+        successor.removeReplicas(self.nodeId, [entry]);
+      });
+    },
+
+    removeEntryIterative: function(entry, callback) {
+      var self = this;
+
+      if (this._references.getPredecessor() &&
+          !entry.id.isInInterval(this._references.getPredecessor().nodeId, this.nodeId)) {
+        callback('REDIRECT', this._references.getPredecessor());
         return;
       }
 
@@ -439,7 +489,7 @@ define([
         successor.removeReplicas(self.nodeId, [entry]);
       });
 
-      callback();
+      callback('SUCCESS');
     },
 
     getStatuses: function() {
