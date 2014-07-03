@@ -14,10 +14,10 @@ define(['lodash', 'cryptojs', 'Utils'], function(_, CryptoJS, Utils) {
       var str = b.toString(16);
       return b < 0x10 ? "0" + str : str;
     }).join("");
-    this._bitLength = this._bytes.length * 8;
   };
 
   ID._BYTE_SIZE = 32;
+  ID._BIT_LENGTH = ID._BYTE_SIZE * 8;
 
   ID.create = function(str) {
     if (!Utils.isNonemptyString(str)) {
@@ -74,14 +74,13 @@ define(['lodash', 'cryptojs', 'Utils'], function(_, CryptoJS, Utils) {
 
       if (fromId.compareTo(toId) < 0) {
         return (this.compareTo(fromId) > 0 && this.compareTo(toId) < 0);
+      } else {
+        return (this.compareTo(fromId) > 0 || this.compareTo(toId) < 0);
       }
-
-      return ((this.compareTo(fromId) > 0 && this.compareTo(ID.maxId) <= 0 && !fromId.equals(ID.maxId)) ||
-              (this.compareTo(ID.minId) >= 0 && this.compareTo(toId) < 0 && !ID.minId.equals(toId)));
     },
 
     addPowerOfTwo: function(powerOfTwo) {
-      if (powerOfTwo < 0 || powerOfTwo >= this._bitLength) {
+      if (powerOfTwo < 0 || powerOfTwo >= ID._BIT_LENGTH) {
         throw new Error("Power of two out of index.");
       }
 
@@ -114,8 +113,8 @@ define(['lodash', 'cryptojs', 'Utils'], function(_, CryptoJS, Utils) {
       }
 
       var diff = this.sub(id);
-      for (var i = 0; i < this._bitLength; i++) {
-        if (ID.minId.addPowerOfTwo(i).compareTo(diff) > 0) {
+      for (var i = 0; i < ID._BIT_LENGTH; i++) {
+        if (ID._powerOfTwos[i].compareTo(diff) > 0) {
           if (i === 0) {
             return -Infinity;
           }
@@ -141,7 +140,7 @@ define(['lodash', 'cryptojs', 'Utils'], function(_, CryptoJS, Utils) {
     },
 
     getLength: function() {
-      return this._bitLength;
+      return ID._BIT_LENGTH;
     },
 
     toHexString: function() {
@@ -156,6 +155,10 @@ define(['lodash', 'cryptojs', 'Utils'], function(_, CryptoJS, Utils) {
   ID.maxId = new ID(_(ID._BYTE_SIZE).times(function() {
     return 0xff;
   }).value());
+
+  ID._powerOfTwos = _(ID.minId.getLength()).times(function(i) {
+    return ID.minId.addPowerOfTwo(i);
+  }).value();
 
   return ID;
 });
