@@ -357,10 +357,16 @@ define([
       var self = this;
 
       if (this._references.getPredecessor() &&
-          !entry.id.isInInterval(this._references.getPredecessor().nodeId, this.nodeId)) {
+          !entry.id.isInInterval(this._references.getPredecessor().nodeId, this.nodeId) &&
+          !entry.id.equals(this.nodeId)) {
         this.findSuccessor(entry.id, function(successor, error) {
           if (error) {
             callback(error);
+            return;
+          }
+
+          if (successor.equals(self)) {
+            callback(new Error("Something went wrong."));
             return;
           }
 
@@ -384,7 +390,8 @@ define([
       var self = this;
 
       if (this._references.getPredecessor() &&
-          !entry.id.isInInterval(this._references.getPredecessor().nodeId, this.nodeId)) {
+          !entry.id.isInInterval(this._references.getPredecessor().nodeId, this.nodeId) &&
+          !entry.id.equals(this.nodeId)) {
         callback('REDIRECT', this._references.getPredecessor());
         return;
       }
@@ -403,9 +410,12 @@ define([
     },
 
     retrieveEntries: function(id, callback) {
+      var self = this;
+
       if (this._entries.has(id) ||
           !this._references.getPredecessor() ||
-          id.isInInterval(this._references.getPredecessor().nodeId, this.nodeId)) {
+          id.isInInterval(this._references.getPredecessor().nodeId, this.nodeId) ||
+          id.equals(this.nodeId)) {
         callback(this._entries.getEntries(id));
         return;
       }
@@ -413,6 +423,11 @@ define([
       this.findSuccessor(id, function(successor, error) {
         if (error) {
           callback(null, error);
+          return;
+        }
+
+        if (successor.equals(self)) {
+          callback(null, new Error("Something went wrong."));
           return;
         }
 
@@ -430,7 +445,8 @@ define([
     retrieveEntriesIterative: function(id, callback) {
       if (this._entries.has(id) ||
           !this._references.getPredecessor() ||
-          id.isInInterval(this._references.getPredecessor().nodeId, this.nodeId)) {
+          id.isInInterval(this._references.getPredecessor().nodeId, this.nodeId) ||
+          id.equals(this.nodeId)) {
         callback('SUCCESS', this._entries.getEntries(id));
         return;
       }
@@ -442,10 +458,16 @@ define([
       var self = this;
 
       if (this._references.getPredecessor() &&
-          !entry.id.isInInterval(this._references.getPredecessor().nodeId, this.nodeId)) {
+          !entry.id.isInInterval(this._references.getPredecessor().nodeId, this.nodeId) &&
+          !entry.id.equals(this.nodeId)) {
         this.findSuccessor(entry.id, function(successor, error) {
           if (error) {
             callback(error);
+            return;
+          }
+
+          if (successor.equals(self)) {
+            callback(new Error("Something went wrong."));
             return;
           }
 
@@ -469,7 +491,8 @@ define([
       var self = this;
 
       if (this._references.getPredecessor() &&
-          !entry.id.isInInterval(this._references.getPredecessor().nodeId, this.nodeId)) {
+          !entry.id.isInInterval(this._references.getPredecessor().nodeId, this.nodeId) &&
+          !entry.id.equals(this.nodeId)) {
         callback('REDIRECT', this._references.getPredecessor());
         return;
       }
