@@ -234,32 +234,28 @@ define([
         return;
       }
 
-      var successor = this._references.getSuccessor();
-      if (_.isNull(successor)) {
+      if (!this._references.getPredecessor() ||
+          key.isInInterval(this._references.getPredecessor().nodeId, this.nodeId) ||
+          key.equals(this.nodeId)) {
         callback(this);
         return;
       }
 
-      if (key.isInInterval(this.nodeId, successor.nodeId) ||
-          key.equals(successor.nodeId)) {
-        successor.ping(function(error) {
-          if (error) {
-            console.log(error);
-            self._references.removeReference(successor);
-            self.findSuccessor(key, callback);
-            return;
-          }
+      var nextNode = this._references.getClosestPrecedingNode(key);
+      if (!nextNode) {
+        var successor = this._references.getSuccessor();
+        if (!successor) {
+          callback(this);
+          return;
+        }
 
-          callback(successor);
-        });
-        return;
+        nextNode = successor;
       }
 
-      var closestPrecedingNode = this._references.getClosestPrecedingNode(key);
-      closestPrecedingNode.findSuccessor(key, function(successor, error) {
+      nextNode.findSuccessor(key, function(successor, error) {
         if (error) {
           console.log(error);
-          self._references.removeReference(closestPrecedingNode);
+          self._references.removeReference(nextNode);
           self.findSuccessor(key, callback);
           return;
         }
@@ -276,29 +272,25 @@ define([
         return;
       }
 
-      var successor = this._references.getSuccessor();
-      if (_.isNull(successor)) {
+      if (!this._references.getPredecessor() ||
+          key.isInInterval(this._references.getPredecessor().nodeId, this.nodeId) ||
+          key.equals(this.nodeId)) {
         callback('SUCCESS', this);
         return;
       }
 
-      if (key.isInInterval(this.nodeId, successor.nodeId) ||
-          key.equals(successor.nodeId)) {
-        successor.ping(function(error) {
-          if (error) {
-            console.log(error);
-            self._references.removeReference(successor);
-            self.findSuccessor(key, callback);
-            return;
-          }
+      var nextNode = this._references.getClosestPrecedingNode(key);
+      if (!nextNode) {
+        var successor = this._references.getSuccessor();
+        if (!successor) {
+          callback('SUCCESS', this);
+          return;
+        }
 
-          callback('SUCCESS', successor);
-        });
-        return;
+        nextNode = successor;
       }
 
-      var closestPrecedingNode = this._references.getClosestPrecedingNode(key);
-      callback('REDIRECT', closestPrecedingNode);
+      callback('REDIRECT', nextNode);
     },
 
     notifyAndCopyEntries: function(potentialPredecessor, callback) {
