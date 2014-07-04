@@ -11,11 +11,7 @@ define(['lodash', 'cryptojs', 'Utils'], function(_, CryptoJS, Utils) {
   };
 
   Packet.create = function(flags, payload) {
-    return new Packet(Packet._createId(), flags, payload);
-  };
-
-  Packet._createId = function() {
-    return CryptoJS.SHA256(Math.random().toString()).toString();
+    return new Packet(Utils.generateRandomId(8), flags, payload);
   };
 
   Packet.fromJson = function(json) {

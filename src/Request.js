@@ -18,11 +18,7 @@ define(['lodash', 'cryptojs', 'Response', 'Utils'], function(_, CryptoJS, Respon
   };
 
   Request.create = function(method, params) {
-    return new Request(Utils.version, method, params, Request._createId(), _.now());
-  };
-
-  Request._createId = function() {
-    return CryptoJS.SHA256(Math.random().toString()).toString();
+    return new Request(Utils.version, method, params, Utils.generateRandomId(8), _.now());
   };
 
   Request.isRequest = function(data) {

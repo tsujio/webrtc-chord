@@ -22,6 +22,14 @@ define(['lodash'], function(_) {
       list.splice(index, 0, item);
     },
 
+    generateRandomId: function(length) {
+      var id = "";
+      while (id.length < length) {
+        id += Math.random().toString(36).substr(2);
+      }
+      return id.substr(0, length);
+    },
+
     enableDebugLog: function(enabled) {
       Utils.debug = function() {
         if (enabled) {
