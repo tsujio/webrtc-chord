@@ -193,13 +193,34 @@ define([
         return;
       }
 
-      this.insertEntry(entry, callback);
+      this.findSuccessor(entry.id, function(successor, error) {
+        if (error) {
+          callback(error);
+          return;
+        }
+
+        successor.insertEntry(entry, callback);
+      });
     },
 
     retrieve: function(key, callback) {
       var id = ID.create(key);
 
-      this.retrieveEntries(id, callback);
+      this.findSuccessor(id, function(successor, error) {
+        if (error) {
+          callback(null, error);
+          return;
+        }
+
+        successor.retrieveEntries(id, function(entries, error) {
+          if (error) {
+            callback(null, error);
+            return;
+          }
+
+          callback(_.map(entries, function(entry) { return entry.value; }));
+        });
+      });
     },
 
     remove: function(key, value, callback) {
@@ -212,7 +233,14 @@ define([
         return;
       }
 
-      this.removeEntry(entry, callback);
+      this.findSuccessor(entry.id, function(successor, error) {
+        if (error) {
+          callback(error);
+          return;
+        }
+
+        successor.removeEntry(entry, callback);
+      });
     },
 
     
@@ -354,35 +382,14 @@ define([
     },
 
     insertEntry: function(entry, callback) {
-      var self = this;
-
-      if (this._references.getPredecessor() &&
-          !entry.id.isInInterval(this._references.getPredecessor().nodeId, this.nodeId) &&
-          !entry.id.equals(this.nodeId)) {
-        this.findSuccessor(entry.id, function(successor, error) {
-          if (error) {
-            callback(error);
-            return;
-          }
-
-          if (successor.equals(self)) {
-            callback(new Error("Something went wrong."));
-            return;
-          }
-
-          successor.insertEntry(entry, callback);
-        });
-        return;
-      }
-
-      this._entries.add(entry);
-
-      _.defer(function() {
-        self._chord.onentriesinserted([entry.toJson()]);
-      });
-
-      _.each(this._references.getSuccessors(), function(successor) {
-        successor.insertReplicas([entry]);
+      this.insertEntryIterative(entry, function(status, node) {
+        if (status === 'SUCCESS') {
+          callback();
+        } else if (status === 'REDIRECT') {
+          node.insertEntry(entry, callback);
+        } else {
+          callback(new Error("Got unknown status:", status));
+        }
       });
     },
 
@@ -410,80 +417,42 @@ define([
     },
 
     retrieveEntries: function(id, callback) {
-      var self = this;
-
-      if (this._entries.has(id) ||
-          !this._references.getPredecessor() ||
-          id.isInInterval(this._references.getPredecessor().nodeId, this.nodeId) ||
-          id.equals(this.nodeId)) {
-        callback(this._entries.getEntries(id));
-        return;
-      }
-
-      this.findSuccessor(id, function(successor, error) {
-        if (error) {
-          callback(null, error);
-          return;
+      this.retrieveEntriesIterative(id, function(status, entries, node) {
+        if (status === 'SUCCESS') {
+          callback(entries);
+        } else if (status === 'REDIRECT') {
+          node.retrieveEntries(id, callback);
+        } else {
+          callback(null, new Error("Got unknown status:", status));
         }
-
-        if (successor.equals(self)) {
-          callback(null, new Error("Something went wrong."));
-          return;
-        }
-
-        successor.retrieveEntries(id, function(entries, error) {
-          if (error) {
-            callback(null, error);
-            return;
-          }
-
-          callback(_.map(entries, function(entry) { return entry.value; }));
-        });
       });
     },
 
     retrieveEntriesIterative: function(id, callback) {
-      if (this._entries.has(id) ||
-          !this._references.getPredecessor() ||
-          id.isInInterval(this._references.getPredecessor().nodeId, this.nodeId) ||
-          id.equals(this.nodeId)) {
+      if (this._entries.has(id)) {
         callback('SUCCESS', this._entries.getEntries(id));
         return;
       }
 
-      callback('REDIRECT', null, this._references.getPredecessor());
-    },
-
-    removeEntry: function(entry, callback) {
-      var self = this;
-
       if (this._references.getPredecessor() &&
-          !entry.id.isInInterval(this._references.getPredecessor().nodeId, this.nodeId) &&
-          !entry.id.equals(this.nodeId)) {
-        this.findSuccessor(entry.id, function(successor, error) {
-          if (error) {
-            callback(error);
-            return;
-          }
-
-          if (successor.equals(self)) {
-            callback(new Error("Something went wrong."));
-            return;
-          }
-
-          successor.removeEntry(entry, callback);
-        });
+          !id.isInInterval(this._references.getPredecessor().nodeId, this.nodeId) &&
+          !id.equals(this.nodeId)) {
+        callback('REDIRECT', null, this._references.getPredecessor());
         return;
       }
 
-      this._entries.remove(entry);
+      callback('SUCCESS', this._entries.getEntries(id));
+    },
 
-      _.defer(function() {
-        self._chord.onentriesremoved([entry.toJson()]);
-      });
-
-      _.each(this._references.getSuccessors(), function(successor) {
-        successor.removeReplicas(self.nodeId, [entry]);
+    removeEntry: function(entry, callback) {
+       this.removeEntryIterative(entry, function(status, node) {
+        if (status === 'SUCCESS') {
+          callback();
+        } else if (status === 'REDIRECT') {
+          node.removeEntry(entry, callback);
+        } else {
+          callback(new Error("Got unknown status:", status));
+        }
       });
     },
 
