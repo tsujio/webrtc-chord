@@ -184,10 +184,9 @@ define([
     },
 
     insert: function(key, value, callback) {
-      var id = ID.create(key);
       var entry;
       try {
-        entry = new Entry(id, value);
+        entry = new Entry(ID.create(key), value);
       } catch (e) {
         callback(e);
         return;
@@ -204,7 +203,13 @@ define([
     },
 
     retrieve: function(key, callback) {
-      var id = ID.create(key);
+      var id;
+      try {
+        id = ID.create(key);
+      } catch (e) {
+        callback(null, e);
+        return;
+      }
 
       this.findSuccessor(id, function(successor, error) {
         if (error) {
@@ -224,10 +229,9 @@ define([
     },
 
     remove: function(key, value, callback) {
-      var id = ID.create(key);
       var entry;
       try {
-        entry = new Entry(id, value);
+        entry = new Entry(ID.create(key), value);
       } catch (e) {
         callback(e);
         return;
