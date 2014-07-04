@@ -33,11 +33,11 @@ define(['lodash', 'cryptojs', 'Utils'], function(_, CryptoJS, Utils) {
   };
 
   ID._createBytesFromHexString = function(str) {
-    if (!Utils.isNonemptyString(str)) {
+    if (!Utils.isNonemptyString(str) || str.length < ID._BYTE_SIZE * 2) {
       throw new Error("Invalid argument.");
     }
 
-    return _(Math.floor(str.length / 2)).times(function(i) {
+    return _(ID._BYTE_SIZE).times(function(i) {
       return parseInt(str.substr(i * 2, 2), 16);
     }).value();
   };
