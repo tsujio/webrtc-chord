@@ -231,6 +231,7 @@ define([
 
       if (_.isNull(key)) {
         callback(null, new Error("Invalid argument."));
+        return;
       }
 
       var successor = this._references.getSuccessor();
@@ -272,6 +273,7 @@ define([
 
       if (_.isNull(key)) {
         callback('FAILED', null, new Error("Invalid argument."));
+        return;
       }
 
       var successor = this._references.getSuccessor();
