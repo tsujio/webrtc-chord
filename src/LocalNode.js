@@ -79,7 +79,7 @@ define([
 
         self._references.addReference(bootstrapNode);
 
-        bootstrapNode.findSuccessor(self.nodeId, function(successor, error) {
+        bootstrapNode.findSuccessor(self.nodeId.addPowerOfTwo(0), function(successor, error) {
           if (error) {
             Utils.debug("[join] Failed to find successor:", error);
             self._references.removeReference(bootstrapNode);
