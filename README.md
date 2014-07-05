@@ -140,6 +140,8 @@ Then, you can insert/retrieve/remove entries.
 chord.insert(key, value, function(id, error) {
   if (error) {
     console.log("Failed to insert entry: " + error);
+  } else {
+    console.log("The entry has been inserted (id: " + id + ")");
   }
 });
 
@@ -147,6 +149,8 @@ chord.insert(key, value, function(id, error) {
 chord.retrieve(key, function(entries, error) {
   if (error) {
     console.log("Failed to retrieve entries: " + error);
+  } else {
+    console.log("Retrieved " + entries.length + " entries.");
   }
 });
 
@@ -154,6 +158,8 @@ chord.retrieve(key, function(entries, error) {
 chord.remove(key, value, function(error) {
   if (error) {
     console.log("Failed to remove entry: " + error);
+  } else {
+    console.log("The entry has been removed.");
   }
 });
 ```
