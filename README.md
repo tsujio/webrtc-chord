@@ -137,7 +137,7 @@ chord.join(bootstrapId, function(myPeerId, error) {
 Then, you can insert/retrieve/remove entries.
 ```javascript
 // Insert entry
-chord.insert(key, value, function(error) {
+chord.insert(key, value, function(id, error) {
   if (error) {
     console.log("Failed to insert entry: " + error);
   }

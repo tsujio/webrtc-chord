@@ -89,11 +89,11 @@ define(['lodash', 'LocalNode', 'Utils'], function(_, LocalNode, Utils) {
         callback = function() {};
       }
       if (!this._localNode) {
-        callback(new Error("Create or join network at first."));
+        callback(null, new Error("Create or join network at first."));
         return;
       }
       if (!Utils.isNonemptyString(key) || _.isUndefined(value)) {
-        callback(new Error("Invalid arguments."));
+        callback(null, new Error("Invalid arguments."));
         return;
       }
 

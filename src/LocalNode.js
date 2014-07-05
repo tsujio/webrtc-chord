@@ -188,17 +188,24 @@ define([
       try {
         entry = new Entry(ID.create(key), value);
       } catch (e) {
-        callback(e);
+        callback(null, e);
         return;
       }
 
       this.findSuccessor(entry.id, function(successor, error) {
         if (error) {
-          callback(error);
+          callback(null, error);
           return;
         }
 
-        successor.insertEntry(entry, callback);
+        successor.insertEntry(entry, function(error) {
+          if (error) {
+            callback(null, error);
+            return;
+          }
+
+          callback(entry.id.toHexString());
+        });
       });
     },
 
