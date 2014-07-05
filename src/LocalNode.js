@@ -268,38 +268,25 @@ define([
     findSuccessor: function(key, callback) {
       var self = this;
 
-      if (_.isNull(key)) {
-        callback(null, new Error("Invalid argument."));
-        return;
-      }
+      this.findSuccessorIterative(key, function(status, successor, error) {
+        if (status === 'SUCCESS') {
+          callback(successor);
+        } else if (status === 'REDIRECT') {
+          successor.findSuccessor(key, function(_successor, error) {
+            if (error) {
+              console.log(error);
+              self._references.removeReference(successor);
+              self.findSuccessor(key, callback);
+              return;
+            }
 
-      if (!this._references.getPredecessor() ||
-          key.isInInterval(this._references.getPredecessor().nodeId, this.nodeId) ||
-          key.equals(this.nodeId)) {
-        callback(this);
-        return;
-      }
-
-      var nextNode = this._references.getClosestPrecedingNode(key);
-      if (!nextNode) {
-        var successor = this._references.getSuccessor();
-        if (!successor) {
-          callback(this);
-          return;
+            callback(_successor);
+          });
+        } else if (status === 'FAILED') {
+          callback(null, error);
+        } else {
+          callback(null, new Error("Got unknown status:", status));
         }
-
-        nextNode = successor;
-      }
-
-      nextNode.findSuccessor(key, function(successor, error) {
-        if (error) {
-          console.log(error);
-          self._references.removeReference(nextNode);
-          self.findSuccessor(key, callback);
-          return;
-        }
-
-        callback(successor);
       });
     },
 
