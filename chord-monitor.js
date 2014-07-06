@@ -201,7 +201,7 @@
           value = JSON.parse(value);
         } catch (e) {
         }
-        chord.insert(key, value, function(error) {
+        chord.insert(key, value, function(id, error) {
           if (error) {
             console.log("Failed to insert entry: " + error);
           }
