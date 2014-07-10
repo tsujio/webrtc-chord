@@ -1,4 +1,8 @@
-define(['lodash', 'cryptojs', 'Response', 'Utils'], function(_, CryptoJS, Response, Utils) {
+(function() {
+  var _ = require('lodash');
+  var Response = require('./Response');
+  var Utils = require('./Utils');
+
   var Request = function(version, method, params, requestId, timestamp) {
     if (version[0] !== Utils.version[0]) {
       throw new Error("Cannot communicate with version " + version.join('.') +
@@ -44,5 +48,5 @@ define(['lodash', 'cryptojs', 'Response', 'Utils'], function(_, CryptoJS, Respon
     }
   };
 
-  return Request;
-});
+  module.exports = Request;
+})();

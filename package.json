@@ -1,0 +1,42 @@
+{
+  "name": "webrtc-chord",
+  "version": "1.0.0",
+  "description": "An implementation of Chord, a protocol of Distributed Hash Table, using WebRTC.",
+  "main": "src/Chord.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "build": "browserify --standalone Chord . | uglifyjs > dist/webrtc-chord.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tsujio/webrtc-chord.git"
+  },
+  "keywords": [
+    "webrtc",
+    "chord",
+    "dht"
+  ],
+  "author": "tsujio",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tsujio/webrtc-chord/issues"
+  },
+  "homepage": "https://github.com/tsujio/webrtc-chord",
+  "browserify": {
+    "transform": [
+      "browserify-shim"
+    ]
+  },
+  "browserify-shim": {
+    "lodash": "global:_",
+    "cryptojs": "global:CryptoJS",
+    "peerjs": "global:Peer"
+  },
+  "devDependencies": {
+    "browserify": "^4.2.0",
+    "browserify-shim": "^3.6.0",
+    "uglify-js": "^2.4.15"
+  }
+}

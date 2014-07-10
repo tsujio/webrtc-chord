@@ -1,9 +1,15 @@
-define([
-  'lodash', 'NodeFactory', 'EntryList', 'Entry', 'ReferenceList', 'ID', 'StabilizeTask',
-  'FixFingerTask', 'CheckPredecessorTask', 'Utils'
-], function(
-  _, NodeFactory, EntryList, Entry, ReferenceList, ID, StabilizeTask, FixFingerTask, CheckPredecessorTask, Utils
-) {
+(function() {
+  var _ = require('lodash');
+  var NodeFactory = require('./NodeFactory');
+  var EntryList = require('./EntryList');
+  var Entry = require('./Entry');
+  var ReferenceList = require('./ReferenceList');
+  var ID = require('./ID');
+  var StabilizeTask = require('./StabilizeTask');
+  var FixFingerTask = require('./FixFingerTask');
+  var CheckPredecessorTask = require('./CheckPredecessorTask');
+  var Utils = require('./Utils');
+
   var LocalNode = function(chord, config) {
     if (!Utils.isPositiveNumber(config.maximumNumberOfAttemptsOfNotifyAndCopyOnJoin)) {
       config.maximumNumberOfAttemptsOfNotifyAndCopyOnJoin = 5;
@@ -513,5 +519,5 @@ define([
     }
   };
 
-  return LocalNode;
-});
+  module.exports = LocalNode;
+})();

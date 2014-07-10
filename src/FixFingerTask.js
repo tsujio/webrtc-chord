@@ -1,4 +1,7 @@
-define(['lodash', 'Utils'], function(_, Utils) {
+(function() {
+  var _ = require('lodash');
+  var Utils = require('./Utils');
+
   var FixFingerTask = function(localNode, references) {
     this._localNode = localNode;
     this._references = references;
@@ -46,5 +49,5 @@ define(['lodash', 'Utils'], function(_, Utils) {
     }
   };
 
-  return FixFingerTask;
-});
+  module.exports = FixFingerTask;
+})();

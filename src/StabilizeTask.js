@@ -1,4 +1,7 @@
-define(['lodash', 'Utils'], function(_, Utils) {
+(function() {
+  var _ = require('lodash');
+  var Utils = require('./Utils');
+
   var StabilizeTask = function(localNode, references, entries) {
     this._localNode = localNode;
     this._references = references;
@@ -97,5 +100,5 @@ define(['lodash', 'Utils'], function(_, Utils) {
     }
   };
 
-  return StabilizeTask;
-});
+  module.exports = StabilizeTask;
+})();

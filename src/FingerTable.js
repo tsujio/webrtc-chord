@@ -1,4 +1,6 @@
-define(['lodash'], function(_) {
+(function() {
+  var _ = require('lodash');
+
   var FingerTable = function(localId, references) {
     if (!localId || !references) {
       throw new Error("Invalid arguments.");
@@ -150,5 +152,5 @@ define(['lodash'], function(_) {
     }
   };
 
-  return FingerTable;
-});
+  module.exports = FingerTable;
+})();

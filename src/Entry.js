@@ -1,4 +1,7 @@
-define(['lodash', 'ID'], function(_, ID) {
+(function() {
+  var _ = require('lodash');
+  var ID = require('./ID');
+
   var Entry = function(id, value) {
     if (_.isNull(id) || _.isUndefined(value)) {
       throw new Error("Invalid argument.");
@@ -32,5 +35,5 @@ define(['lodash', 'ID'], function(_, ID) {
     }
   };
 
-  return Entry;
-});
+  module.exports = Entry;
+})();

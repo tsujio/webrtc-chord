@@ -1,6 +1,10 @@
-define([
-  'lodash', 'Request', 'Response', 'Packet', 'Utils'
-], function(_, Request, Response, Packet, Utils) {
+(function() {
+  var _ = require('lodash');
+  var Request = require('./Request');
+  var Response = require('./Response');
+  var Packet = require('./Packet');
+  var Utils = require('./Utils');
+
   var Connection = function(conn, callbacks, config) {
     var self = this;
 
@@ -104,5 +108,5 @@ define([
     }
   };
 
-  return Connection;
-});
+  module.exports = Connection;
+})();

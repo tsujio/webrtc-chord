@@ -1,4 +1,8 @@
-define(['lodash', 'cryptojs', 'Utils'], function(_, CryptoJS, Utils) {
+(function() {
+  var _ = require('lodash');
+  var CryptoJS = require('cryptojs');
+  var Utils = require('./Utils');
+
   var ID = function(bytes) {
     _.each(bytes, function(b) {
       if (_.isNaN(b) || !_.isNumber(b) || b < 0x00 || 0xff < b) {
@@ -160,5 +164,5 @@ define(['lodash', 'cryptojs', 'Utils'], function(_, CryptoJS, Utils) {
     return ID.minId.addPowerOfTwo(i);
   }).value();
 
-  return ID;
-});
+  module.exports = ID;
+})();

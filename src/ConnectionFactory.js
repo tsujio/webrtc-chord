@@ -1,4 +1,9 @@
-define(['lodash', 'PeerAgent', 'Connection', 'Utils'], function(_, PeerAgent, Connection, Utils) {
+(function() {
+  var _ = require('lodash');
+  var PeerAgent = require('./PeerAgent');
+  var Connection = require('./Connection');
+  var Utils = require('./Utils');
+
   var ConnectionFactory = function(config, nodeFactory, callback) {
     var self = this;
 
@@ -182,5 +187,5 @@ define(['lodash', 'PeerAgent', 'Connection', 'Utils'], function(_, PeerAgent, Co
     }
   };
 
-  return ConnectionFactory;
-});
+  module.exports = ConnectionFactory;
+})();

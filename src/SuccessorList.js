@@ -1,4 +1,7 @@
-define(['lodash', 'Utils'], function(_, Utils) {
+(function() {
+  var _ = require('lodash');
+  var Utils = require('./Utils');
+
   var SuccessorList = function(localId, entries, references, config) {
     if (!localId || !entries || !references) {
       throw new Error("Invalid argument.");
@@ -141,5 +144,5 @@ define(['lodash', 'Utils'], function(_, Utils) {
     }
   };
 
-  return SuccessorList;
-});
+  module.exports = SuccessorList;
+})();

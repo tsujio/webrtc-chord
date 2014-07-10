@@ -1,4 +1,8 @@
-define(['lodash', 'LocalNode', 'Utils'], function(_, LocalNode, Utils) {
+(function() {
+  var _ = require('lodash');
+  var LocalNode = require('./LocalNode');
+  var Utils = require('./Utils');
+
   var Chord = function(config) {
     if (!_.isObject(config)) {
       throw new Error("Invalid argument.");
@@ -176,5 +180,5 @@ define(['lodash', 'LocalNode', 'Utils'], function(_, LocalNode, Utils) {
     }
   };
 
-  return Chord;
-});
+  module.exports = Chord;
+})();

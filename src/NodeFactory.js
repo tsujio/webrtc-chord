@@ -1,6 +1,11 @@
-define([
-  'lodash', 'Node', 'ConnectionFactory', 'RequestHandler', 'ID', 'Utils'
-], function(_, Node, ConnectionFactory, RequestHandler, ID, Utils) {
+(function() {
+  var _ = require('lodash');
+  var Node = require('./Node');
+  var ConnectionFactory = require('./ConnectionFactory');
+  var RequestHandler = require('./RequestHandler');
+  var ID = require('./ID');
+  var Utils = require('./Utils');
+
   var NodeFactory = function(localNode, config) {
     var self = this;
 
@@ -109,5 +114,5 @@ define([
     }
   };
 
-  return NodeFactory;
-});
+  module.exports = NodeFactory;
+})();

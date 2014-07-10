@@ -31,18 +31,10 @@ WebRTC and PeerJS uses STUN/TURN server and PeerServer, so you may need
 to adjust some proxy settings to access to them.
 
 ## Build
-Linux
 ```sh
-npm install -g requirejs
 cd webrtc-chord
-r.js -o bin/build.js
-```
-
-Windows
-```bat
-npm install -g requirejs
-cd webrtc-chord
-r.js.cmd -o bin\build.js
+npm install
+npm run-script build
 ```
 
 ## Include libraries

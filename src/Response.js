@@ -1,4 +1,7 @@
-define(['lodash', 'Utils'], function(_, Utils) {
+(function() {
+  var _ = require('lodash');
+  var Utils = require('./Utils');
+
   var Response = function(version, status, method, result, requestId, timestamp) {
     if (version[0] !== Utils.version[0]) {
       throw new Error("Cannot communicate with version " + version.join('.') +
@@ -54,5 +57,5 @@ define(['lodash', 'Utils'], function(_, Utils) {
     },
   };
 
-  return Response;
-});
+  module.exports = Response;
+})();

@@ -1,4 +1,8 @@
-define(['lodash', 'ID', 'Utils'], function(_, ID, Utils) {
+(function() {
+  var _ = require('lodash');
+  var ID = require('./ID');
+  var Utils = require('./Utils');
+
   var EntryList = function() {
     this._entries = {};
   };
@@ -143,5 +147,5 @@ define(['lodash', 'ID', 'Utils'], function(_, ID, Utils) {
     }
   };
 
-  return EntryList;
-});
+  module.exports = EntryList;
+})();

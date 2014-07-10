@@ -1,4 +1,8 @@
-define(['lodash', 'peerjs', 'Utils'], function(_, Peer, Utils) {
+(function() {
+  var _ = require('lodash');
+  var Peer = require('peerjs');
+  var Utils = require('./Utils');
+
   var PeerAgent = function(config, callbacks) {
     var self = this;
 
@@ -125,5 +129,5 @@ define(['lodash', 'peerjs', 'Utils'], function(_, Peer, Utils) {
     }
   };
 
-  return PeerAgent;
-});
+  module.exports = PeerAgent;
+})();

@@ -1,4 +1,6 @@
-define(['lodash'], function(_) {
+(function() {
+  var _ = require('lodash');
+
   var Utils = {
     version: [1, 0, 0],
 
@@ -186,5 +188,5 @@ define(['lodash'], function(_) {
 
   Utils.Cache = Cache;
 
-  return Utils;
-});
+  module.exports = Utils;
+})();

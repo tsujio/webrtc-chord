@@ -1,4 +1,10 @@
-define(['lodash', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Request, Entry, Utils) {
+(function() {
+  var _ = require('lodash');
+  var ID = require('./ID');
+  var Request = require('./Request');
+  var Entry = require('./Entry');
+  var Utils = require('./Utils');
+
   var Node = function(nodeInfo, nodeFactory, connectionFactory, requestHandler, config) {
     if (!Node.isValidNodeInfo(nodeInfo)) {
       throw new Error("Invalid arguments.");
@@ -365,5 +371,5 @@ define(['lodash', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Request, E
     }
   };
 
-  return Node;
-});
+  module.exports = Node;
+})();

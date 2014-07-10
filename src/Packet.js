@@ -1,4 +1,7 @@
-define(['lodash', 'cryptojs', 'Utils'], function(_, CryptoJS, Utils) {
+(function() {
+  var _ = require('lodash');
+  var Utils = require('./Utils');
+
   var Packet = function(id, flags, payload) {
     if (!Utils.isNonemptyString(id) ||
         !_.isObject(flags) || !_.isObject(payload)) {
@@ -31,5 +34,5 @@ define(['lodash', 'cryptojs', 'Utils'], function(_, CryptoJS, Utils) {
     }
   };
 
-  return Packet;
-});
+  module.exports = Packet;
+})();

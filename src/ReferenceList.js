@@ -1,4 +1,8 @@
-define(['lodash', 'FingerTable', 'SuccessorList'], function(_, FingerTable, SuccessorList) {
+(function() {
+  var _ = require('lodash');
+  var FingerTable = require('./FingerTable');
+  var SuccessorList = require('./SuccessorList');
+
   var ReferenceList = function(localId, entries, config) {
     if (!localId || !entries) {
       throw new Error("Invalid arguments.");
@@ -176,5 +180,5 @@ define(['lodash', 'FingerTable', 'SuccessorList'], function(_, FingerTable, Succ
     }
   };
 
-  return ReferenceList;
-});
+  module.exports = ReferenceList;
+})();

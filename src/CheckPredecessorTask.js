@@ -1,4 +1,7 @@
-define(['lodash', 'Utils'], function(_, Utils) {
+(function() {
+  var lodash = require('lodash');
+  var Utils = require('./Utils');
+
   var CheckPredecessorTask = function(references) {
     this._references = references;
     this._timer = null;
@@ -45,5 +48,5 @@ define(['lodash', 'Utils'], function(_, Utils) {
     }
   };
 
-  return CheckPredecessorTask;
-});
+  module.exports = CheckPredecessorTask;
+})();

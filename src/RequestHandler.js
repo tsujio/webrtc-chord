@@ -1,4 +1,10 @@
-define(['lodash', 'ID', 'Response', 'Entry', 'Utils'], function(_, ID, Response, Entry, Utils) {
+(function() {
+  var _ = require('lodash');
+  var ID = require('./ID');
+  var Response = require('./Response');
+  var Entry = require('./Entry');
+  var Utils = require('./Utils');
+
   var RequestHandler = function(localNode, nodeFactory) {
     this._localNode = localNode;
     this._nodeFactory = nodeFactory;
@@ -256,5 +262,5 @@ define(['lodash', 'ID', 'Response', 'Entry', 'Utils'], function(_, ID, Response,
     }
   };
 
-  return RequestHandler;
-});
+  module.exports = RequestHandler;
+})();
