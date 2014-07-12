@@ -1,4 +1,4 @@
-define(['underscore', 'Utils'], function(_, Utils) {
+define(['lodash', 'Utils'], function(_, Utils) {
   var CheckPredecessorTask = function(references) {
     this._references = references;
     this._timer = null;
@@ -26,7 +26,7 @@ define(['underscore', 'Utils'], function(_, Utils) {
         return;
       }
 
-      predecessor.ping(function(isAlive, error) {
+      predecessor.ping(function(error) {
         if (error) {
           console.log(error);
           self._references.removeReference(predecessor);

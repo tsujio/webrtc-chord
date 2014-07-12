@@ -1,5 +1,5 @@
 define([
-  'underscore', 'Node', 'ConnectionFactory', 'RequestHandler', 'ID', 'Utils'
+  'lodash', 'Node', 'ConnectionFactory', 'RequestHandler', 'ID', 'Utils'
 ], function(_, Node, ConnectionFactory, RequestHandler, ID, Utils) {
   var NodeFactory = function(localNode, config) {
     var self = this;

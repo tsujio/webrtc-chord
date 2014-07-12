@@ -1,10 +1,11 @@
-define(['underscore', 'LocalNode', 'Utils'], function(_, LocalNode, Utils) {
+define(['lodash', 'LocalNode', 'Utils'], function(_, LocalNode, Utils) {
   var Chord = function(config, onMessageReceivedCallback) {
     if (!_.isObject(config)) {
       throw new Error("Invalid argument.");
     }
     Utils.enableDebugLog(config.debug);
 
+    this.version = Utils.version.join('.');
     this._config = config;
     this._localNode = null;
     this.onentriesinserted = function(entries) { ; };
@@ -89,11 +90,11 @@ define(['underscore', 'LocalNode', 'Utils'], function(_, LocalNode, Utils) {
         callback = function() {};
       }
       if (!this._localNode) {
-        callback(new Error("Create or join network at first."));
+        callback(null, new Error("Create or join network at first."));
         return;
       }
       if (!Utils.isNonemptyString(key) || _.isUndefined(value)) {
-        callback(new Error("Invalid arguments."));
+        callback(null, new Error("Invalid arguments."));
         return;
       }
 
@@ -105,11 +106,11 @@ define(['underscore', 'LocalNode', 'Utils'], function(_, LocalNode, Utils) {
         callback = function() {};
       }
       if (!this._localNode) {
-        callback(new Error("Create or join network at first."));
+        callback(null, new Error("Create or join network at first."));
         return;
       }
       if (!Utils.isNonemptyString(key)) {
-        callback(new Error("Invalid argument."));
+        callback(null, new Error("Invalid argument."));
         return;
       }
 
@@ -149,6 +150,20 @@ define(['underscore', 'LocalNode', 'Utils'], function(_, LocalNode, Utils) {
         return;
       }
       this._localNode.listAllPeers(callback);
+    },
+
+    getEntries: function() {
+      if (!this._localNode) {
+        throw new Error("Create or join network at first.");
+      }
+      return this._localNode.getEntries();
+    },
+
+    setEntries: function(entries) {
+      if (!this._localNode) {
+        throw new Error("Create or join network at first.");
+      }
+      return this._localNode.setEntries(entries);
     },
 
     getStatuses: function() {

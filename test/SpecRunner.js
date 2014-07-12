@@ -9,7 +9,7 @@
       'jasmine-html': '../test/lib/jasmine-2.0.0/jasmine-html',
       'boot': '../test/lib/jasmine-2.0.0/boot',
 
-      underscore: 'http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min',
+      lodash: 'http://cdnjs.cloudflare.com/ajax/libs/lodash.js/2.4.1/lodash.min',
       cryptojs: 'http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/sha256'
     },
 
@@ -38,6 +38,7 @@
     '../test/spec/IDSpec',
     '../test/spec/FingerTableSpec',
     '../test/spec/SuccessorListSpec',
+    '../test/spec/ReferenceListSpec',
   ];
 
   // Load Jasmine - This will still create all of the normal Jasmine browser globals unless `boot.js` is re-written to use the

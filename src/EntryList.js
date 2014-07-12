@@ -1,4 +1,4 @@
-define(['underscore', 'ID', 'Utils'], function(_, ID, Utils) {
+define(['lodash', 'ID', 'Utils'], function(_, ID, Utils) {
   var EntryList = function() {
     this._entries = {};
   };
@@ -94,6 +94,10 @@ define(['underscore', 'ID', 'Utils'], function(_, ID, Utils) {
       });
     },
 
+    has: function(id) {
+      return _.has(this._entries, id.toHexString());
+    },
+
     getNumberOfStoredEntries: function() {
       return _.size(this._entries);
     },
@@ -109,6 +113,15 @@ define(['underscore', 'ID', 'Utils'], function(_, ID, Utils) {
           ];
         })
         .object()
+        .value();
+    },
+
+    dump: function() {
+      return _.chain(this._entries)
+        .map(function(entries) {
+          return _.invoke(entries.items(), 'toJson');
+        })
+        .flatten()
         .value();
     },
 

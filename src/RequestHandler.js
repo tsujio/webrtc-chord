@@ -1,4 +1,4 @@
-define(['underscore', 'ID', 'Response', 'Entry', 'Utils'], function(_, ID, Response, Entry, Utils) {
+define(['lodash', 'ID', 'Response', 'Entry', 'Utils'], function(_, ID, Response, Entry, Utils) {
   var RequestHandler = function(localNode, nodeFactory) {
     this._localNode = localNode;
     this._nodeFactory = nodeFactory;
@@ -16,16 +16,22 @@ define(['underscore', 'ID', 'Response', 'Entry', 'Utils'], function(_, ID, Respo
         }
 
         var key = ID.fromHexString(request.params.key);
-        this._localNode.findSuccessor(key, function(successor, error) {
+        this._localNode.findSuccessorIterative(key, function(status, node, error) {
           if (error) {
             console.log(error);
             self._sendFailureResponse(e.message, request, callback);
             return;
           }
 
-          self._sendSuccessResponse({
-            successorNodeInfo: successor.toNodeInfo()
-          }, request, callback);
+          if (status === 'SUCCESS') {
+            self._sendSuccessResponse({
+              successorNodeInfo: node.toNodeInfo()
+            }, request, callback);
+          } else if (status === 'REDIRECT') {
+            self._sendRedirectResponse({
+              redirectNodeInfo: node.toNodeInfo()
+            }, request, callback);
+          }
         });
         break;
 
@@ -126,11 +132,19 @@ define(['underscore', 'ID', 'Response', 'Entry', 'Utils'], function(_, ID, Respo
           self._sendFailureResponse(e.message, request, callback);;
           return;
         }
-        self._localNode.insertEntry(entry, function(inserted) {
-          if (!inserted) {
+        self._localNode.insertEntryIterative(entry, function(status, node, error) {
+          if (error) {
+            console.log("Failed to insert entry:", error);
             self._sendFailureResponse("Unknown error.", request, callback);
-          } else {
+            return;
+          }
+
+          if (status === 'SUCCESS') {
             self._sendSuccessResponse({}, request, callback);
+          } else if (status === 'REDIRECT') {
+            self._sendRedirectResponse({
+              redirectNodeInfo: node.toNodeInfo()
+            }, request, callback);
           }
         });
         break;
@@ -143,12 +157,20 @@ define(['underscore', 'ID', 'Response', 'Entry', 'Utils'], function(_, ID, Respo
           self._sendFailureResponse(e.message, request, callback);
           return;
         }
-        self._localNode.retrieveEntries(id, function(entries) {
-          if (_.isNull(entries)) {
+        self._localNode.retrieveEntriesIterative(id, function(status, entries, node, error) {
+          if (error) {
+            console.log("Failed to retrieve entries:", error);
             self._sendFailureResponse("Unknown error.", request, callback);
-          } else {
+            return;
+          }
+
+          if (status === 'SUCCESS') {
             self._sendSuccessResponse({
               entries: _.invoke(entries, 'toJson')
+            }, request, callback);
+          } else if (status === 'REDIRECT') {
+            self._sendRedirectResponse({
+              redirectNodeInfo: node.toNodeInfo()
             }, request, callback);
           }
         });
@@ -162,11 +184,19 @@ define(['underscore', 'ID', 'Response', 'Entry', 'Utils'], function(_, ID, Respo
           self._sendFailureResponse(e.message, request, callback);
           return;
         }
-        self._localNode.removeEntry(entry, function(removed) {
-          if (!removed) {
+        self._localNode.removeEntryIterative(entry, function(status, node, error) {
+          if (error) {
+            console.log("Failed to remove entry:", error);
             self._sendFailureResponse("Unknown error.", request, callback);
-          } else {
+            return;
+          }
+
+          if (status === 'SUCCESS') {
             self._sendSuccessResponse({}, request, callback);
+          } else if (status === 'REDIRECT') {
+            self._sendRedirectResponse({
+              redirectNodeInfo: node.toNodeInfo()
+            }, request, callback);
           }
         });
         break;
@@ -200,12 +230,20 @@ define(['underscore', 'ID', 'Response', 'Entry', 'Utils'], function(_, ID, Respo
     },
 
     _sendSuccessResponse: function(result, request, callback) {
+      this._sendResponse('SUCCESS', result, request, callback);
+    },
+
+    _sendRedirectResponse: function(result, request, callback) {
+      this._sendResponse('REDIRECT', result, request, callback);
+    },
+
+    _sendResponse: function(status, result, request, callback) {
       var self = this;
 
       var response;
       try {
-        response = Response.create('SUCCESS', result, request);
-      } catch (e){
+        response = Response.create(status, result, request);
+      } catch (e) {
         this._sendFailureResponse(e.message, request, callback);
         return;
       }

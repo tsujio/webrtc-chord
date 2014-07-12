@@ -1,15 +1,38 @@
-define(['underscore', 'Request', 'Response'], function(_, Request, Response) {
-  var Connection = function(conn, callbacks) {
+define([
+  'lodash', 'Request', 'Response', 'Packet', 'Utils'
+], function(_, Request, Response, Packet, Utils) {
+  var Connection = function(conn, callbacks, config) {
     var self = this;
+
+    if (!Utils.isZeroOrPositiveNumber(config.connectionCloseDelay)) {
+      config.connectionCloseDelay = 30000;
+    }
 
     this._conn = conn;
     this._callbacks = callbacks;
+    this._config = config;
+    this._shutdown = false;
 
     this._conn.on('data', function(data) {
-      self._onDataReceived(data);
+      var packet;
+      try {
+        packet = Packet.fromJson(data);
+      } catch (e) {
+        console.error(e);
+        return;
+      }
+
+      if (packet.flags.FIN) {
+        self._shutdown = true;
+        callbacks.receivedFin(self);
+        return;
+      }
+
+      self._onDataReceived(packet.payload);
     });
 
     this._conn.on('close', function() {
+      self._shutdown = true;
       callbacks.closedByRemote(self);
     });
 
@@ -20,7 +43,13 @@ define(['underscore', 'Request', 'Response'], function(_, Request, Response) {
 
   Connection.prototype = {
     send: function(requestOrResponse, callback) {
-      this._conn.send(requestOrResponse.toJson());
+      var packet = Packet.create({}, requestOrResponse.toJson());
+
+      if (this.isAvailable()) {
+        this._conn.send(packet.toJson());
+      } else {
+        throw new Error("Connection is not available.");
+      }
     },
 
     _onDataReceived: function(data) {
@@ -31,6 +60,7 @@ define(['underscore', 'Request', 'Response'], function(_, Request, Response) {
         try {
           response = Response.fromJson(data);
         } catch (e) {
+          console.log(e);
           return;
         }
         this._callbacks.responseReceived(this, response);
@@ -39,6 +69,7 @@ define(['underscore', 'Request', 'Response'], function(_, Request, Response) {
         try {
           request = Request.fromJson(data);
         } catch (e) {
+          console.log(e);
           return;
         }
         this._callbacks.requestReceived(this, request);
@@ -49,8 +80,19 @@ define(['underscore', 'Request', 'Response'], function(_, Request, Response) {
       this._callbacks.closedByLocal(this);
     },
 
-    destroy: function() {
-      this._conn.close();
+    shutdown: function() {
+      var self = this;
+
+      if (this.isAvailable()) {
+        var packet = Packet.create({FIN: true}, {});
+        this._conn.send(packet.toJson());
+      }
+
+      this._shutdown = true;
+
+      _.delay(function() {
+        self._conn.close();
+      }, this._config.connectionCloseDelay);
     },
 
     getPeerId: function() {
@@ -58,7 +100,7 @@ define(['underscore', 'Request', 'Response'], function(_, Request, Response) {
     },
 
     isAvailable: function() {
-      return this._conn.open;
+      return !this._shutdown && this._conn.open;
     }
   };
 

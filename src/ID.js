@@ -1,18 +1,23 @@
-define(['underscore', 'cryptojs', 'Utils'], function(_, CryptoJS, Utils) {
+define(['lodash', 'cryptojs', 'Utils'], function(_, CryptoJS, Utils) {
   var ID = function(bytes) {
     _.each(bytes, function(b) {
       if (_.isNaN(b) || !_.isNumber(b) || b < 0x00 || 0xff < b) {
         throw new Error("Invalid argument.");
       }
     });
-    if (_.size(bytes) !== ID._BYTE_SIZE) {
+    if (bytes.length !== ID._BYTE_SIZE) {
       throw new Error("Invalid argument.");
     }
 
     this._bytes = _.last(bytes, ID._BYTE_SIZE);
+    this._hexString = _.map(this._bytes, function(b) {
+      var str = b.toString(16);
+      return b < 0x10 ? "0" + str : str;
+    }).join("");
   };
 
   ID._BYTE_SIZE = 32;
+  ID._BIT_LENGTH = ID._BYTE_SIZE * 8;
 
   ID.create = function(str) {
     if (!Utils.isNonemptyString(str)) {
@@ -24,26 +29,42 @@ define(['underscore', 'cryptojs', 'Utils'], function(_, CryptoJS, Utils) {
 
   ID._createBytes = function(str) {
     var hash = CryptoJS.SHA256(str).toString(CryptoJS.enc.Hex);
-    return ID._createBytesfromHexString(hash);
+    return ID._createBytesFromHexString(hash);
   };
 
-  ID._createBytesfromHexString = function(str) {
-    if (!Utils.isNonemptyString(str)) {
+  ID._createBytesFromHexString = function(str) {
+    if (!Utils.isNonemptyString(str) || str.length < ID._BYTE_SIZE * 2) {
       throw new Error("Invalid argument.");
     }
 
-    return _(Math.floor(_.size(str) / 2)).times(function(i) {
+    return _(ID._BYTE_SIZE).times(function(i) {
       return parseInt(str.substr(i * 2, 2), 16);
-    });
+    }).value();
   };
 
   ID.fromHexString = function(str) {
-    return new ID(ID._createBytesfromHexString(str));
+    return new ID(ID._createBytesFromHexString(str));
+  };
+
+  ID._addInBytes = function(bytes1, bytes2) {
+    var copy = _.clone(bytes1);
+    var carry = 0;
+    for (var i = bytes1.length - 1; i >= 0; i--) {
+      copy[i] += (bytes2[i] + carry);
+      if (copy[i] < 0) {
+        carry = -1;
+        copy[i] += 0x100;
+      } else {
+        carry = copy[i] >> 8;
+      }
+      copy[i] &= 0xff;
+    }
+    return copy;
   };
 
   ID.prototype = {
     isInInterval: function(fromId, toId) {
-      if (_.isNull(fromId) || _.isNull(toId)) {
+      if (!fromId || !toId) {
         throw new Error("Invalid arguments.");
       }
 
@@ -53,28 +74,18 @@ define(['underscore', 'cryptojs', 'Utils'], function(_, CryptoJS, Utils) {
 
       if (fromId.compareTo(toId) < 0) {
         return (this.compareTo(fromId) > 0 && this.compareTo(toId) < 0);
+      } else {
+        return (this.compareTo(fromId) > 0 || this.compareTo(toId) < 0);
       }
-
-      var minId = new ID(_(_.size(this._bytes)).times(function() {
-        return 0x00;
-      }));
-      var maxId = new ID(_(_.size(this._bytes)).times(function() {
-        return 0xff;
-      }));
-      return ((!fromId.equals(maxId) && this.compareTo(fromId) > 0 && this.compareTo(maxId) <= 0) ||
-              (!minId.equals(toId) && this.compareTo(minId) >= 0 && this.compareTo(toId) < 0));
     },
 
     addPowerOfTwo: function(powerOfTwo) {
-      if (!_.isNumber(powerOfTwo)) {
-        throw new Error("Invalid argument.");
-      }
-      if (powerOfTwo < 0 || powerOfTwo >= this.getLength()) {
+      if (powerOfTwo < 0 || powerOfTwo >= ID._BIT_LENGTH) {
         throw new Error("Power of two out of index.");
       }
 
       var copy = _.clone(this._bytes);
-      var indexOfBytes = _.size(this._bytes) - 1 - Math.floor(powerOfTwo / 8);
+      var indexOfBytes = this._bytes.length - 1 - Math.floor(powerOfTwo / 8);
       var valueToAdd = [1, 2, 4, 8, 16, 32, 64, 128][powerOfTwo % 8];
       for (var i = indexOfBytes; i >= 0; i--) {
         copy[i] += valueToAdd;
@@ -88,16 +99,36 @@ define(['underscore', 'cryptojs', 'Utils'], function(_, CryptoJS, Utils) {
       return new ID(copy);
     },
 
-    compareTo: function(id) {
-      if (this.getLength() !== id.getLength()) {
-        throw new Error("Invalid argument.");
+    add: function(id) {
+      return new ID(ID._addInBytes(this._bytes, id._bytes));
+    },
+
+    sub: function(id) {
+      return new ID(ID._addInBytes(this._bytes, _.map(id._bytes, function(b) { return -b; })));
+    },
+
+    getIntervalInPowerOfTwoFrom: function(id) {
+      if (this.equals(id)) {
+        return -Infinity;
       }
 
-      var bytes = _.zip(this._bytes, id._bytes);
-      for (var i = 0; i < bytes.length; i++) {
-        if (bytes[i][0] < bytes[i][1]) {
+      var diff = this.sub(id);
+      for (var i = 0; i < ID._BIT_LENGTH; i++) {
+        if (ID._powerOfTwos[i].compareTo(diff) > 0) {
+          if (i === 0) {
+            return -Infinity;
+          }
+          break;
+        }
+      }
+      return i - 1;
+    },
+
+    compareTo: function(id) {
+      for (var i = 0; i < ID._BYTE_SIZE; i++) {
+        if (this._bytes[i] < id._bytes[i]) {
           return -1;
-        } else if (bytes[i][0] > bytes[i][1]) {
+        } else if (this._bytes[i] > id._bytes[i]) {
           return 1;
         }
       }
@@ -109,16 +140,25 @@ define(['underscore', 'cryptojs', 'Utils'], function(_, CryptoJS, Utils) {
     },
 
     getLength: function() {
-      return _.size(this._bytes) * 8;
+      return ID._BIT_LENGTH;
     },
 
     toHexString: function() {
-      return _.map(this._bytes, function(b) {
-        var str = b.toString(16);
-        return b < 0x10 ? "0" + str : str;
-      }).join("");
+      return this._hexString;
     }
   };
+
+  ID.minId = new ID(_(ID._BYTE_SIZE).times(function() {
+    return 0x00;
+  }).value());
+
+  ID.maxId = new ID(_(ID._BYTE_SIZE).times(function() {
+    return 0xff;
+  }).value());
+
+  ID._powerOfTwos = _(ID.minId.getLength()).times(function(i) {
+    return ID.minId.addPowerOfTwo(i);
+  }).value();
 
   return ID;
 });

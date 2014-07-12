@@ -1,4 +1,4 @@
-define(['underscore', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Request, Entry, Utils) {
+define(['lodash', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Request, Entry, Utils) {
   var Node = function(nodeInfo, nodeFactory, connectionFactory, requestHandler, config) {
     if (!Node.isValidNodeInfo(nodeInfo)) {
       throw new Error("Invalid arguments.");
@@ -41,6 +41,19 @@ define(['underscore', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Reques
         success: function(result) {
           var nodeInfo = result.successorNodeInfo;
           self._nodeFactory.create(nodeInfo, callback);
+        },
+
+        redirect: function(result) {
+          self._nodeFactory.create(result.redirectNodeInfo, function(node, error) {
+            if (error) {
+              callback(null, error);
+              return;
+            }
+
+            Utils.debug("[findSuccessor] redirected to " + node.getPeerId());
+
+            node.findSuccessor(key, callback);
+          });
         },
 
         error: function(error) {
@@ -121,11 +134,11 @@ define(['underscore', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Reques
     ping: function(callback) {
       this._sendRequest('PING', {}, {
         success: function(result) {
-          callback(true);
+          callback();
         },
 
         error: function(error) {
-          callback(false, error);
+          callback(error);
         }
       });
     },
@@ -142,11 +155,26 @@ define(['underscore', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Reques
     },
 
     insertEntry: function(entry, callback) {
+      var self = this;
+
       this._sendRequest('INSERT_ENTRY', {
         entry: entry.toJson()
       }, {
         success: function(result) {
           callback();
+        },
+
+        redirect: function(result) {
+          self._nodeFactory.create(result.redirectNodeInfo, function(node, error) {
+            if (error) {
+              callback(error);
+              return;
+            }
+
+            Utils.debug("[insertEntry] redirected to " + node.getPeerId());
+
+            node.insertEntry(entry, callback);
+          });
         },
 
         error: function(error) {
@@ -180,6 +208,19 @@ define(['underscore', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Reques
           callback(entries);
         },
 
+        redirect: function(result) {
+          self._nodeFactory.create(result.redirectNodeInfo, function(node, error) {
+            if (error) {
+              callback(null, error);
+              return;
+            }
+
+            Utils.debug("[retrieveEntries] redirected to " + node.getPeerId());
+
+            node.retrieveEntries(id, callback);
+          });
+        },
+
         error: function(error) {
           callback(null, error);
         }
@@ -187,11 +228,26 @@ define(['underscore', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Reques
     },
 
     removeEntry: function(entry, callback) {
+      var self = this;
+
       this._sendRequest('REMOVE_ENTRY', {
         entry: entry.toJson()
       }, {
         success: function(result) {
           callback();
+        },
+
+        redirect: function(result) {
+          self._nodeFactory.create(result.redirectNodeInfo, function(node, error) {
+            if (error) {
+              callback(error);
+              return;
+            }
+
+            Utils.debug("[removeEntry] redirected to " + node.getPeerId());
+
+            node.removeEntry(entry, callback);
+          });
         },
 
         error: function(error) {
@@ -209,7 +265,7 @@ define(['underscore', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Reques
 
       this._connectionFactory.create(this._peerId, function(connection, error) {
         if (error) {
-          if (!_.isUndefined(callbacks)) {
+          if (callbacks && callbacks.error) {
             callbacks.error(error);
           }
           return;
@@ -217,25 +273,30 @@ define(['underscore', 'ID', 'Request', 'Entry', 'Utils'], function(_, ID, Reques
 
         var request = Request.create(method, params);
 
-        if (!_.isUndefined(callbacks)) {
+        if (callbacks) {
+          callbacks = _.defaults(callbacks, {
+            success: function() {}, redirect: function() {}, error: function() {}
+          });
+
           var timer = setTimeout(function() {
-            var callback = self._nodeFactory.deregisterCallback(request.requestId);
-            if (!_.isNull(callback)) {
-              callbacks.error(new Error(method + " request to " + self._peerId + " timed out."));
-            }
+            self._nodeFactory.deregisterCallback(request.requestId);
+            callbacks.error(new Error(method + " request to " + self._peerId + " timed out."));
           }, self._config.requestTimeout);
 
           self._nodeFactory.registerCallback(request.requestId, _.once(function(response) {
             clearTimeout(timer);
 
-            if (response.status !== 'SUCCESS') {
-              var error = new Error(
-                "Request to " + self._peerId + " failed: " + response.result.message);
-              callbacks.error(error);
-              return;
-            }
+            switch (response.status) {
+            case 'SUCCESS': callbacks.success(response.result); break;
+            case 'REDIRECT': callbacks.redirect(response.result); break;
+            case 'FAILED':
+              callbacks.error(new Error(
+                "Request to " + self._peerId + " failed: " + response.result.message));
+              break;
 
-            callbacks.success(response.result);
+            default:
+              callback.error(new Error("Received unknown status response:", response.status));
+            }
           }));
         }
 

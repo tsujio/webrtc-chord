@@ -1,5 +1,7 @@
-define(['underscore'], function(_) {
+define(['lodash'], function(_) {
   var Utils = {
+    version: [1, 0, 0],
+
     isNonemptyString: function(value) {
       return _.isString(value) && !_.isEmpty(value);
     },
@@ -18,6 +20,14 @@ define(['underscore'], function(_) {
 
     insert: function(list, index, item) {
       list.splice(index, 0, item);
+    },
+
+    generateRandomId: function(length) {
+      var id = "";
+      while (id.length < length) {
+        id += Math.random().toString(36).substr(2);
+      }
+      return id.substr(0, length);
     },
 
     enableDebugLog: function(enabled) {

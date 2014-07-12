@@ -168,5 +168,92 @@ define(['ID'], function(ID) {
                  ID.fromHexString("0000000000000000000000000000000100000000000000000000000000000000"));
       });
     });
+
+    describe("#add", function() {
+      it("should return the sum of the two IDs", function() {
+        var id1 = ID.fromHexString("0000000000000000000000000000000000000000000000000000000000000000");
+        var id2 = ID.fromHexString("00000000000000000000000000000000ffffffffffffffffffffffffffffffff");
+        var id3 = ID.fromHexString("0000000000000000ffffffffffffffffffffffffffffffff0000000000000000");
+        var id4 = ID.fromHexString("ffffffffffffffffffffffffffffffff00000000000000000000000000000000");
+
+        expect(id1.add(id1).toHexString()).toBe("0000000000000000000000000000000000000000000000000000000000000000");
+        expect(id1.add(id2).toHexString()).toBe("00000000000000000000000000000000ffffffffffffffffffffffffffffffff");
+        expect(id1.add(id3).toHexString()).toBe("0000000000000000ffffffffffffffffffffffffffffffff0000000000000000");
+        expect(id1.add(id4).toHexString()).toBe("ffffffffffffffffffffffffffffffff00000000000000000000000000000000");
+
+        expect(id2.add(id1)).toEqualId(id1.add(id2));
+        expect(id2.add(id2).toHexString()).toBe("00000000000000000000000000000001fffffffffffffffffffffffffffffffe");
+        expect(id2.add(id3).toHexString()).toBe("00000000000000010000000000000000fffffffffffffffeffffffffffffffff");
+        expect(id2.add(id4).toHexString()).toBe("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
+
+        expect(id3.add(id1)).toEqualId(id1.add(id3));
+        expect(id3.add(id2)).toEqualId(id2.add(id3));
+        expect(id3.add(id3).toHexString()).toBe("0000000000000001fffffffffffffffffffffffffffffffe0000000000000000");
+        expect(id3.add(id4).toHexString()).toBe("0000000000000000fffffffffffffffeffffffffffffffff0000000000000000");
+
+        expect(id4.add(id1)).toEqualId(id1.add(id4));
+        expect(id4.add(id2)).toEqualId(id2.add(id4));
+        expect(id4.add(id3)).toEqualId(id3.add(id4));
+        expect(id4.add(id4).toHexString()).toBe("fffffffffffffffffffffffffffffffe00000000000000000000000000000000");
+      });
+    });
+
+    describe("#sub", function() {
+      it("should return the difference between the two IDs", function() {
+        var id1 = ID.fromHexString("0000000000000000000000000000000000000000000000000000000000000000");
+        var id2 = ID.fromHexString("00000000000000000000000000000000ffffffffffffffffffffffffffffffff");
+        var id3 = ID.fromHexString("0000000000000000ffffffffffffffffffffffffffffffff0000000000000000");
+        var id4 = ID.fromHexString("ffffffffffffffffffffffffffffffff00000000000000000000000000000000");
+
+        expect(id1.sub(id1).toHexString()).toBe("0000000000000000000000000000000000000000000000000000000000000000");
+        expect(id1.sub(id2).toHexString()).toBe("ffffffffffffffffffffffffffffffff00000000000000000000000000000001");
+        expect(id1.sub(id3).toHexString()).toBe("ffffffffffffffff000000000000000000000000000000010000000000000000");
+        expect(id1.sub(id4).toHexString()).toBe("0000000000000000000000000000000100000000000000000000000000000000");
+
+        expect(id2.sub(id1).toHexString()).toBe("00000000000000000000000000000000ffffffffffffffffffffffffffffffff");
+        expect(id2.sub(id2).toHexString()).toBe("0000000000000000000000000000000000000000000000000000000000000000");
+        expect(id2.sub(id3).toHexString()).toBe("ffffffffffffffff00000000000000010000000000000000ffffffffffffffff");
+        expect(id2.sub(id4).toHexString()).toBe("00000000000000000000000000000001ffffffffffffffffffffffffffffffff");
+
+        expect(id3.sub(id1).toHexString()).toBe("0000000000000000ffffffffffffffffffffffffffffffff0000000000000000");
+        expect(id3.sub(id2).toHexString()).toBe("0000000000000000fffffffffffffffeffffffffffffffff0000000000000001");
+        expect(id3.sub(id3).toHexString()).toBe("0000000000000000000000000000000000000000000000000000000000000000");
+        expect(id3.sub(id4).toHexString()).toBe("00000000000000010000000000000000ffffffffffffffff0000000000000000");
+
+        expect(id4.sub(id1).toHexString()).toBe("ffffffffffffffffffffffffffffffff00000000000000000000000000000000");
+        expect(id4.sub(id2).toHexString()).toBe("fffffffffffffffffffffffffffffffe00000000000000000000000000000001");
+        expect(id4.sub(id3).toHexString()).toBe("fffffffffffffffeffffffffffffffff00000000000000010000000000000000");
+        expect(id4.sub(id4).toHexString()).toBe("0000000000000000000000000000000000000000000000000000000000000000");
+      });
+    });
+
+    describe("#getIntervalInPowerOfTwoFrom", function() {
+      it("should return the interval from the passed ID", function() {
+        var id1 = ID.fromHexString("0000000000000000000000000000000000000000000000000000000000000000");
+        var id2 = ID.fromHexString("0000000000000000000000000000000000000000000000000000000000000001");
+        var id3 = ID.fromHexString("00000000000000000000000000000000000000000000000000000000000000ff");
+        var id4 = ID.fromHexString("ffffffffffffffffffffffffffffffff00000000000000000000000000000000");
+
+        expect(id1.getIntervalInPowerOfTwoFrom(id1)).toBe(-Infinity);
+        expect(id1.getIntervalInPowerOfTwoFrom(id2)).toBe(255);
+        expect(id1.getIntervalInPowerOfTwoFrom(id3)).toBe(255);
+        expect(id1.getIntervalInPowerOfTwoFrom(id4)).toBe(128);
+
+        expect(id2.getIntervalInPowerOfTwoFrom(id1)).toBe(0);
+        expect(id2.getIntervalInPowerOfTwoFrom(id2)).toBe(-Infinity);
+        expect(id2.getIntervalInPowerOfTwoFrom(id3)).toBe(255);
+        expect(id2.getIntervalInPowerOfTwoFrom(id4)).toBe(128);
+
+        expect(id3.getIntervalInPowerOfTwoFrom(id1)).toBe(7);
+        expect(id3.getIntervalInPowerOfTwoFrom(id2)).toBe(7);
+        expect(id3.getIntervalInPowerOfTwoFrom(id3)).toBe(-Infinity);
+        expect(id3.getIntervalInPowerOfTwoFrom(id4)).toBe(128);
+
+        expect(id4.getIntervalInPowerOfTwoFrom(id1)).toBe(255);
+        expect(id4.getIntervalInPowerOfTwoFrom(id2)).toBe(255);
+        expect(id4.getIntervalInPowerOfTwoFrom(id3)).toBe(255);
+        expect(id4.getIntervalInPowerOfTwoFrom(id4)).toBe(-Infinity);
+      });
+    });
   });
 });

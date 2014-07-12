@@ -1,4 +1,4 @@
-define(['underscore', 'Utils'], function(_, Utils) {
+define(['lodash', 'Utils'], function(_, Utils) {
   var StabilizeTask = function(localNode, references, entries) {
     this._localNode = localNode;
     this._references = references;
@@ -54,7 +54,7 @@ define(['underscore', 'Utils'], function(_, Utils) {
 
           var currentSuccessor = self._references.getSuccessor();
           if (!currentSuccessor.equals(successor)) {
-            currentSuccessor.ping(function(isAlive, error) {
+            currentSuccessor.ping(function(error) {
               if (error) {
                 console.log(error);
                 self._references.removeReference(currentSuccessor);

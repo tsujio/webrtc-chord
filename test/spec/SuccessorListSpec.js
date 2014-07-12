@@ -22,7 +22,7 @@ define(['SuccessorList', 'Node', 'ID'], function(SuccessorList, Node, ID) {
         spyOn(node, 'insertReplicas');
         spyOn(node, 'removeReplicas');
         return node;
-      });
+      }).value();
       entries[0].nodeId = ID.fromHexString("00000000000000000000000000000000ffffffffffffffffffffffffffffffff");
       entries[1].nodeId = ID.fromHexString("0000000000000000ffffffffffffffffffffffffffffffff0000000000000000");
       entries[2].nodeId = ID.fromHexString("ffffffffffffffffffffffffffffffff00000000000000000000000000000000");

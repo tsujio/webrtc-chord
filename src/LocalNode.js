@@ -1,10 +1,14 @@
 define([
-  'underscore', 'NodeFactory', 'EntryList', 'Entry', 'ReferenceList', 'ID', 'StabilizeTask',
+  'lodash', 'NodeFactory', 'EntryList', 'Entry', 'ReferenceList', 'ID', 'StabilizeTask',
   'FixFingerTask', 'CheckPredecessorTask', 'Utils'
 ], function(
   _, NodeFactory, EntryList, Entry, ReferenceList, ID, StabilizeTask, FixFingerTask, CheckPredecessorTask, Utils
 ) {
   var LocalNode = function(chord, config) {
+    if (!Utils.isPositiveNumber(config.maximumNumberOfAttemptsOfNotifyAndCopyOnJoin)) {
+      config.maximumNumberOfAttemptsOfNotifyAndCopyOnJoin = 5;
+    }
+
     this._chord = chord;
     this._config = config;
     this.nodeId = null;
@@ -75,7 +79,7 @@ define([
 
         self._references.addReference(bootstrapNode);
 
-        bootstrapNode.findSuccessor(self.nodeId, function(successor, error) {
+        bootstrapNode.findSuccessor(self.nodeId.addPowerOfTwo(0), function(successor, error) {
           if (error) {
             Utils.debug("[join] Failed to find successor:", error);
             self._references.removeReference(bootstrapNode);
@@ -92,7 +96,8 @@ define([
                         "(remote peer ID:", node.getPeerId(), ", attempts:", attempts, ").");
 
             if (attempts === 0) {
-              callback(null, null, new Error("Reached maximum count of attempts."));
+              console.log("Reached maximum number of attempts of NOTIFY_AND_COPY.");
+              callback([], []);
               return;
             }
 
@@ -129,7 +134,8 @@ define([
               _notifyAndCopyEntries(refs[0], attempts - 1, callback);
             });
           };
-          _notifyAndCopyEntries(successor, 3, function(refs, entries, error) {
+          var maximumNumberOfAttempts = self._config.maximumNumberOfAttemptsOfNotifyAndCopyOnJoin;
+          _notifyAndCopyEntries(successor, maximumNumberOfAttempts, function(refs, entries, error) {
             if (error) {
               console.log("Failed to notify and copy entries:", error);
               self._createTasks();
@@ -178,26 +184,40 @@ define([
     },
 
     insert: function(key, value, callback) {
-      var id = ID.create(key);
       var entry;
       try {
-        entry = new Entry(id, value);
+        entry = new Entry(ID.create(key), value);
       } catch (e) {
-        callback(e);
+        callback(null, e);
         return;
       }
-      this.findSuccessor(id, function(successor, error) {
+
+      this.findSuccessor(entry.id, function(successor, error) {
         if (error) {
-          callback(error);
+          callback(null, error);
           return;
         }
 
-        successor.insertEntry(entry, callback);
+        successor.insertEntry(entry, function(error) {
+          if (error) {
+            callback(null, error);
+            return;
+          }
+
+          callback(entry.id.toHexString());
+        });
       });
     },
 
     retrieve: function(key, callback) {
-      var id = ID.create(key);
+      var id;
+      try {
+        id = ID.create(key);
+      } catch (e) {
+        callback(null, e);
+        return;
+      }
+
       this.findSuccessor(id, function(successor, error) {
         if (error) {
           callback(null, error);
@@ -216,15 +236,15 @@ define([
     },
 
     remove: function(key, value, callback) {
-      var id = ID.create(key);
       var entry;
       try {
-        entry = new Entry(id, value);
+        entry = new Entry(ID.create(key), value);
       } catch (e) {
         callback(e);
         return;
       }
-      this.findSuccessor(id, function(successor, error) {
+
+      this.findSuccessor(entry.id, function(successor, error) {
         if (error) {
           callback(error);
           return;
@@ -234,36 +254,82 @@ define([
       });
     },
 
+    
+    getEntries: function() {
+      return this._entries.dump();
+    },
+
+    setEntries: function(entries) {
+      this._entries.addAll(_.map(entries, function(entry) {
+        return Entry.fromJson(entry);
+      }));
+    },
+
     findSuccessor: function(key, callback) {
       var self = this;
 
       if (_.isNull(key)) {
         callback(null, new Error("Invalid argument."));
+        return;
       }
 
-      var successor = this._references.getSuccessor();
-      if (_.isNull(successor)) {
+      if (!this._references.getPredecessor() ||
+          key.isInInterval(this._references.getPredecessor().nodeId, this.nodeId) ||
+          key.equals(this.nodeId)) {
         callback(this);
         return;
       }
 
-      if (key.isInInterval(this.nodeId, successor.nodeId) ||
-          key.equals(successor.nodeId)) {
-        callback(successor);
-        return;
+      var nextNode = this._references.getClosestPrecedingNode(key);
+      if (!nextNode) {
+        var successor = this._references.getSuccessor();
+        if (!successor) {
+          callback(this);
+          return;
+        }
+
+        nextNode = successor;
       }
 
-      var closestPrecedingNode = this._references.getClosestPrecedingNode(key);
-      closestPrecedingNode.findSuccessor(key, function(successor, error) {
+      nextNode.findSuccessor(key, function(successor, error) {
         if (error) {
           console.log(error);
-          self._references.removeReference(closestPrecedingNode);
+          self._references.removeReference(nextNode);
           self.findSuccessor(key, callback);
           return;
         }
 
         callback(successor);
       });
+    },
+
+    findSuccessorIterative: function(key, callback) {
+      var self = this;
+
+      if (_.isNull(key)) {
+        callback('FAILED', null, new Error("Invalid argument."));
+        return;
+      }
+
+      if (!this._references.getPredecessor() ||
+          key.isInInterval(this._references.getPredecessor().nodeId, this.nodeId) ||
+          key.equals(this.nodeId)) {
+        callback('SUCCESS', this);
+        return;
+      }
+
+      var nextNode = this._references.getClosestPrecedingNode(key);
+      if (!nextNode) {
+        var successor = this._references.getSuccessor();
+        if (!successor) {
+          callback('SUCCESS', this);
+          return;
+        }
+
+        nextNode = successor;
+      }
+
+      callback('REDIRECT', nextNode);
     },
 
     notifyAndCopyEntries: function(potentialPredecessor, callback) {
@@ -327,11 +393,24 @@ define([
     },
 
     insertEntry: function(entry, callback) {
+      this.insertEntryIterative(entry, function(status, node) {
+        if (status === 'SUCCESS') {
+          callback();
+        } else if (status === 'REDIRECT') {
+          node.insertEntry(entry, callback);
+        } else {
+          callback(new Error("Got unknown status:", status));
+        }
+      });
+    },
+
+    insertEntryIterative: function(entry, callback) {
       var self = this;
 
-      if (!_.isNull(this._references.getPredecessor()) &&
-          !entry.id.isInInterval(this._references.getPredecessor().nodeId, this.nodeId)) {
-        this._references.getPredecessor().insertEntry(entry, callback); 
+      if (this._references.getPredecessor() &&
+          !entry.id.isInInterval(this._references.getPredecessor().nodeId, this.nodeId) &&
+          !entry.id.equals(this.nodeId)) {
+        callback('REDIRECT', this._references.getPredecessor());
         return;
       }
 
@@ -345,25 +424,56 @@ define([
         successor.insertReplicas([entry]);
       });
 
-      callback(true);
+      callback('SUCCESS');
     },
 
     retrieveEntries: function(id, callback) {
-      if (!_.isNull(this._references.getPredecessor()) &&
-          !id.isInInterval(this._references.getPredecessor().nodeId, this.nodeId)) {
-        this._references.getPredecessor().retrieveEntries(id, callback);
+      this.retrieveEntriesIterative(id, function(status, entries, node) {
+        if (status === 'SUCCESS') {
+          callback(entries);
+        } else if (status === 'REDIRECT') {
+          node.retrieveEntries(id, callback);
+        } else {
+          callback(null, new Error("Got unknown status:", status));
+        }
+      });
+    },
+
+    retrieveEntriesIterative: function(id, callback) {
+      if (this._entries.has(id)) {
+        callback('SUCCESS', this._entries.getEntries(id));
         return;
       }
 
-      callback(this._entries.getEntries(id));
+      if (this._references.getPredecessor() &&
+          !id.isInInterval(this._references.getPredecessor().nodeId, this.nodeId) &&
+          !id.equals(this.nodeId)) {
+        callback('REDIRECT', null, this._references.getPredecessor());
+        return;
+      }
+
+      callback('SUCCESS', this._entries.getEntries(id));
     },
 
     removeEntry: function(entry, callback) {
+       this.removeEntryIterative(entry, function(status, node) {
+        if (status === 'SUCCESS') {
+          callback();
+        } else if (status === 'REDIRECT') {
+          node.removeEntry(entry, callback);
+        } else {
+          callback(new Error("Got unknown status:", status));
+        }
+      });
+    },
+
+    removeEntryIterative: function(entry, callback) {
       var self = this;
 
-      if (!_.isNull(this._references.getPredecessor()) &&
-          !entry.id.isInInterval(this._references.getPredecessor().nodeId, this.nodeId)) {
-        this._references.getPredecessor().removeEntry(entry, callback);
+      if (this._references.getPredecessor() &&
+          !entry.id.isInInterval(this._references.getPredecessor().nodeId, this.nodeId) &&
+          !entry.id.equals(this.nodeId)) {
+        callback('REDIRECT', this._references.getPredecessor());
         return;
       }
 
@@ -377,7 +487,7 @@ define([
         successor.removeReplicas(self.nodeId, [entry]);
       });
 
-      callback(true);
+      callback('SUCCESS');
     },
 
     sendMessage: function(toPeerId, message) {

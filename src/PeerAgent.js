@@ -1,4 +1,4 @@
-define(['underscore', 'peerjs', 'Utils'], function(_, Peer, Utils) {
+define(['lodash', 'peerjs', 'Utils'], function(_, Peer, Utils) {
   var PeerAgent = function(config, callbacks) {
     var self = this;
 
@@ -23,7 +23,6 @@ define(['underscore', 'peerjs', 'Utils'], function(_, Peer, Utils) {
     this._config = config;
     this._callbacks = callbacks;
     this._waitingTimer = null;
-    this.connect = _.throttle(this.connect, config.connectRateLimit);
 
     var onPeerSetup = _.once(callbacks.onPeerSetup);
 
@@ -33,7 +32,9 @@ define(['underscore', 'peerjs', 'Utils'], function(_, Peer, Utils) {
       self._peer.on('connection', function(conn) {
         Utils.debug("Connection from", conn.peer);
 
-        callbacks.onConnection(conn.peer, conn);
+        conn.on('open', function() {
+          callbacks.onConnection(conn.peer, conn);
+        });
       });
 
       self._peer.on('close', function() {
@@ -50,7 +51,7 @@ define(['underscore', 'peerjs', 'Utils'], function(_, Peer, Utils) {
 
       var match = error.message.match(/Could not connect to peer (\w+)/);
       if (match) {
-        if (!self.isWaitingOpeningConnection()) {
+        if (!self.isWaitingForOpeningConnection()) {
           return;
         }
 
@@ -71,7 +72,13 @@ define(['underscore', 'peerjs', 'Utils'], function(_, Peer, Utils) {
     connect: function(peerId) {
       var self = this;
 
-      var conn = this._peer.connect(peerId);
+      if (this.isWaitingForOpeningConnection()) {
+        throw new Error("Invalid state.");
+      }
+
+      var conn = this._peer.connect(peerId, {
+        serialization: 'json'
+      });
       if (!conn) {
         var error = new Error("Failed to open connection to " + peerId + ".");
         this._callbacks.onConnectionOpened(peerId, null, error);
@@ -79,7 +86,7 @@ define(['underscore', 'peerjs', 'Utils'], function(_, Peer, Utils) {
       }
 
       this._waitingTimer = setTimeout(function() {
-        if (!self.isWaitingOpeningConnection()) {
+        if (!self.isWaitingForOpeningConnection()) {
           return;
         }
 
@@ -92,7 +99,8 @@ define(['underscore', 'peerjs', 'Utils'], function(_, Peer, Utils) {
       conn.on('open', function() {
         Utils.debug("Connection to", conn.peer, "opened.");
 
-        if (!self.isWaitingOpeningConnection()) {
+        if (!self.isWaitingForOpeningConnection()) {
+          console.log("Unexpected opening connection.");
           conn.close();
           return;
         }
@@ -104,7 +112,7 @@ define(['underscore', 'peerjs', 'Utils'], function(_, Peer, Utils) {
       });
     },
 
-    isWaitingOpeningConnection: function() {
+    isWaitingForOpeningConnection: function() {
       return !_.isNull(this._waitingTimer);
     },
 
