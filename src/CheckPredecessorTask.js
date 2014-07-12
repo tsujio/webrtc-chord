@@ -1,5 +1,5 @@
 (function() {
-  var lodash = require('lodash');
+  var _ = require('lodash');
   var Utils = require('./Utils');
 
   var CheckPredecessorTask = function(references) {
