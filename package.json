@@ -39,7 +39,7 @@
     "browserify": "^4.2.0",
     "browserify-shim": "^3.6.0",
     "crypto-js": "^3.1.2-5",
-    "jasmine-node": "^1.14.2",
+    "jasmine-node": "1.14.2",
     "lodash": "^2.4.1",
     "uglify-js": "^2.4.15"
   }
