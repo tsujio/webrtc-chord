@@ -1,4 +1,9 @@
-define(['ReferenceList', 'Node', 'ID'], function(ReferenceList, Node, ID) {
+(function() {
+  var _ = require('lodash');
+  var ReferenceList = require('../src/ReferenceList');
+  var Node = require('../src/Node');
+  var ID = require('../src/ID');
+
   describe("ReferenceList", function() {
     var references;
     var successors;
@@ -44,8 +49,8 @@ define(['ReferenceList', 'Node', 'ID'], function(ReferenceList, Node, ID) {
 
       it("should not add local node", function() {
         references.addReference({nodeId: references._localId});
-        expect(successors.addSuccessor.calls.count()).toBe(0);
-        expect(fingerTable.addReference.calls.count()).toBe(0);
+        expect(successors.addSuccessor.callCount).toBe(0);
+        expect(fingerTable.addReference.callCount).toBe(0);
       });
     });
 
@@ -72,8 +77,8 @@ define(['ReferenceList', 'Node', 'ID'], function(ReferenceList, Node, ID) {
 
     describe("#getClosestPrecedingNode", function() {
       it("should return closest preceding node", function() {
-        references._successors.getClosestPrecedingNode.and.returnValue(nodes[0]);
-        references._fingerTable.getClosestPrecedingNode.and.returnValue(nodes[1]);
+        references._successors.getClosestPrecedingNode.andReturn(nodes[0]);
+        references._fingerTable.getClosestPrecedingNode.andReturn(nodes[1]);
         references._predecessor = nodes[2];
         expect(references.getClosestPrecedingNode(
           ID.fromHexString("0000000000000000000000000000000000000000000000000000000000000000")))
@@ -126,14 +131,14 @@ define(['ReferenceList', 'Node', 'ID'], function(ReferenceList, Node, ID) {
         references._predecessor = nodes[1];
 
         references.addReferenceAsPredecessor(nodes[0]);
-        expect(references._setPredecessor.calls.count()).toBe(0);
+        expect(references._setPredecessor.callCount).toBe(0);
 
         references.addReferenceAsPredecessor(nodes[2]);
         expect(references._setPredecessor).toHaveBeenCalledWith(nodes[2]);
       });
 
       it("should not add local node as predecessor", function() {
-        expect(references._setPredecessor.calls.count()).toBe(0);
+        expect(references._setPredecessor.callCount).toBe(0);
       });
 
       it("should throw error if passed null", function() {
@@ -141,4 +146,4 @@ define(['ReferenceList', 'Node', 'ID'], function(ReferenceList, Node, ID) {
       });
     });
   });
-});
+})();

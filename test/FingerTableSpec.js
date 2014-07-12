@@ -1,4 +1,9 @@
-define(['FingerTable', 'Node', 'ID'], function(FingerTable, Node, ID) {
+(function() {
+  var _ = require('lodash');
+  var FingerTable = require('../src/FingerTable');
+  var Node = require('../src/Node');
+  var ID = require('../src/ID');
+
   describe("FingerTable", function() {
     var fingerTable;
     var entries;
@@ -6,7 +11,7 @@ define(['FingerTable', 'Node', 'ID'], function(FingerTable, Node, ID) {
     beforeEach(function() {
       var localId = ID.fromHexString("0000000000000000000000000000000000000000000000000000000000000000");
       var references = jasmine.createSpyObj('references', ['disconnectIfUnreferenced', 'getSuccessors']);
-      references.getSuccessors.and.returnValue(entries);
+      references.getSuccessors.andReturn(entries);
       fingerTable = new FingerTable(localId, references);
 
       entries = _(2).times(function() {
@@ -58,7 +63,7 @@ define(['FingerTable', 'Node', 'ID'], function(FingerTable, Node, ID) {
           expect(fingerTable._table[i]).toEqualNode(entries[1]);
         });
 
-        expect(fingerTable._references.disconnectIfUnreferenced.calls.count()).toBe(64);
+        expect(fingerTable._references.disconnectIfUnreferenced.callCount).toBe(64);
         expect(fingerTable._references.disconnectIfUnreferenced).toHaveBeenCalledWith(entries[0]);
       });
     });
@@ -156,4 +161,4 @@ define(['FingerTable', 'Node', 'ID'], function(FingerTable, Node, ID) {
       });
     });
   });
-});
+})();

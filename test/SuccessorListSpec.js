@@ -1,4 +1,9 @@
-define(['SuccessorList', 'Node', 'ID'], function(SuccessorList, Node, ID) {
+(function() {
+  var _ = require('lodash');
+  var SuccessorList = require('../src/SuccessorList');
+  var Node = require('../src/Node');
+  var ID = require('../src/ID');
+
   describe("SuccessorList", function() {
     var successors;
     var entries;
@@ -9,10 +14,10 @@ define(['SuccessorList', 'Node', 'ID'], function(SuccessorList, Node, ID) {
       var _entries = jasmine.createSpyObj('entries', ['getEntriesInInterval']);
       var references = jasmine.createSpyObj('references', [
         'disconnectIfUnreferenced', 'getFirstFingerTableEntries', 'getPredecessor', 'getClosestPrecedingNode']);
-      _entries.getEntriesInInterval.and.returnValue([]);
-      references.getFirstFingerTableEntries.and.returnValue([]);
-      references.getPredecessor.and.returnValue(null);
-      references.getClosestPrecedingNode.and.returnValue(null);
+      _entries.getEntriesInInterval.andReturn([]);
+      references.getFirstFingerTableEntries.andReturn([]);
+      references.getPredecessor.andReturn(null);
+      references.getClosestPrecedingNode.andReturn(null);
       successors = new SuccessorList(localId, _entries, references, {
         numberOfEntriesInSuccessorList: 2
       });
@@ -115,4 +120,4 @@ define(['SuccessorList', 'Node', 'ID'], function(SuccessorList, Node, ID) {
       });
     });
   });
-});
+})();

@@ -1,4 +1,6 @@
-define(['ID'], function(ID) {
+(function() {
+  var ID = require('../src/ID');
+
   describe("ID", function() {
     var id;
 
@@ -90,11 +92,11 @@ define(['ID'], function(ID) {
       });
 
       it("should throw error if invalid string passed", function() {
-        expect(function() { ID.fromHexString(""); }).toThrowError();
-        expect(function() { ID.fromHexString("ffffffff"); }).toThrowError();
+        expect(function() { ID.fromHexString(""); }).toThrow();
+        expect(function() { ID.fromHexString("ffffffff"); }).toThrow();
         expect(function() {
           ID.fromHexString("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz");
-        }).toThrowError();
+        }).toThrow();
       });
     });
 
@@ -256,4 +258,4 @@ define(['ID'], function(ID) {
       });
     });
   });
-});
+})();

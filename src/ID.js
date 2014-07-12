@@ -1,6 +1,6 @@
 (function() {
   var _ = require('lodash');
-  var CryptoJS = require('cryptojs');
+  var CryptoJS = require('crypto-js');
   var Utils = require('./Utils');
 
   var ID = function(bytes) {

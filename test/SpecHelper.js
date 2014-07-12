@@ -1,6 +1,6 @@
-define([], function() {
+(function() {
   beforeEach(function () {
-    jasmine.addMatchers({
+    this.addMatchers({
       toEqualId: function() {
         return  {
           compare: function(actual, expected) {
@@ -22,4 +22,4 @@ define([], function() {
       }
     });
   });
-});
+})();
