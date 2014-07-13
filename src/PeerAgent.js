@@ -50,6 +50,14 @@
       onPeerSetup(id);
     });
 
+    this._peer.on('disconnected', function() {
+      if (!self._peer.destroyed) {
+        Utils.debug("Reconnect to the server.");
+
+        self._peer.reconnect();
+      }
+    });
+
     this._peer.on('error', function(error) {
       Utils.debug("Peer error:", error);
 

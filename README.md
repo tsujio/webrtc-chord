@@ -41,7 +41,7 @@ npm run-script build
 webrtc-chord depends on the following libraries.
 * [Lo-Dash](http://lodash.com/)
 * [sha256.js of crypto-js libraries](https://code.google.com/p/crypto-js/)
-* [PeerJS](https://github.com/peers/peerjs)
+* [PeerJS](https://github.com/peers/peerjs) (>= 0.3.9)
 
 So you must include them **before** include webrtc-chord.js as the following.
 ```html
