@@ -88,9 +88,7 @@
         throw new Error("Invalid state.");
       }
 
-      var conn = this._peer.connect(peerId, {
-        serialization: 'json'
-      });
+      var conn = this._peer.connect(peerId);
       if (!conn) {
         var error = new Error("Failed to open connection to " + peerId + ".");
         this._callbacks.onConnectionOpened(peerId, null, error);
