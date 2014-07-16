@@ -1,0 +1,4 @@
+{
+  "name": "connectionpool",
+  "main": "./connectionpool.js"
+}
