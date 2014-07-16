@@ -1,7 +1,9 @@
 (function() {
   var _ = require('lodash');
+  var ConnectionFactory = require('connectionpool');
   var Node = require('./Node');
-  var ConnectionFactory = require('./ConnectionFactory');
+  var Request = require('./Request');
+  var Response = require('./Response');
   var RequestHandler = require('./RequestHandler');
   var ID = require('./ID');
   var Utils = require('./Utils');
@@ -26,16 +28,23 @@
     }
 
     var nodeFactory = new NodeFactory(localNode, config);
-    ConnectionFactory.create(config, nodeFactory, function(connectionFactory, error) {
-      if (error) {
-        callback(null, null, error);
-        return;
-      }
 
+    var callbackOnce = _.once(callback);
+    var connectionFactory = new ConnectionFactory(config);
+
+    connectionFactory.onopen = function(peerId) {
       nodeFactory._connectionFactory = connectionFactory;
+      callbackOnce(peerId, nodeFactory);
+    };
 
-      callback(connectionFactory.getPeerId(), nodeFactory);
-    });
+    connectionFactory.onconnection = function(connection) {
+      nodeFactory.setListenersToConnection(connection);
+    };
+
+    connectionFactory.onerror = function(error) {
+      console.log(error);
+      callbackOnce(null, null, error);
+    };
   };
 
   NodeFactory.prototype = {
@@ -76,7 +85,37 @@
       });
     },
 
-    onRequestReceived: function(peerId, request) {
+    setListenersToConnection: function(connection) {
+      var self = this;
+
+      connection.ondata = function(data) {
+        if (Response.isResponse(data)) {
+          var response;
+          try {
+            response = Response.fromJson(data);
+          } catch (e) {
+            console.log(e);
+            return;
+          }
+          self._responseReceived(connection.getRemotePeerId(), response);
+        } else if (Request.isRequest(data)) {
+          var request;
+          try {
+            request = Request.fromJson(data);
+          } catch (e) {
+            console.log(e);
+            return;
+          }
+          self._requestReceived(connection.getRemotePeerId(), request);
+        }
+      };
+
+      connection.onerror = function(error) {
+        console.log(error);
+      };
+    },
+
+    _requestReceived: function(peerId, request) {
       this.create({peerId: peerId}, function(node, error) {
         if (error) {
           console.log(error);
@@ -86,7 +125,7 @@
       });
     },
 
-    onResponseReceived: function(peerId, response) {
+    _responseReceived: function(peerId, response) {
       this.create({peerId: peerId}, function(node, error) {
         if (error) {
           console.log(error);

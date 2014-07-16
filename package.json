@@ -35,6 +35,9 @@
     "crypto-js": "global:CryptoJS",
     "peerjs": "global:Peer"
   },
+  "browser": {
+    "connectionpool": "./deps/webrtc-connectionpool/src/ConnectionFactory.js"
+  },
   "devDependencies": {
     "browserify": "^4.2.0",
     "browserify-shim": "^3.6.0",

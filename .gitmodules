@@ -1,0 +1,3 @@
+[submodule "deps/webrtc-connectionpool"]
+	path = deps/webrtc-connectionpool
+	url = git://github.com/tsujio/webrtc-connectionpool.git

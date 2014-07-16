@@ -273,6 +273,8 @@
           return;
         }
 
+        self._nodeFactory.setListenersToConnection(connection);
+
         var request = Request.create(method, params);
 
         if (callbacks) {
@@ -304,11 +306,7 @@
 
         Utils.debug("Sending request to", self._peerId, ":", request.method);
 
-        try {
-          connection.send(request);
-        } finally {
-          connection.close();
-        }
+        connection.send(request);
       });
     },
 
@@ -324,13 +322,11 @@
             return;
           }
 
+          self._nodeFactory.setListenersToConnection(connection);
+
           Utils.debug("Sending response to", self._peerId, ":", response.method);
 
-          try {
-            connection.send(response);
-          } finally {
-            connection.close();
-          }
+          connection.send(response);
         });
       });
     },
