@@ -2,17 +2,18 @@
   var _ = require('lodash');
   var Utils = require('./Utils');
 
-  var CheckPredecessorTask = function(references) {
+  var CheckPredecessorTask = function(localNode, references) {
+    this._localNode = localNode;
     this._references = references;
     this._timer = null;
   };
 
-  CheckPredecessorTask.create = function(references, config) {
+  CheckPredecessorTask.create = function(localNode, references, config) {
     if (!Utils.isZeroOrPositiveNumber(config.checkPredecessorTaskInterval)) {
       config.checkPredecessorTaskInterval = 30000;
     }
 
-    var task = new CheckPredecessorTask(references);
+    var task = new CheckPredecessorTask(localNode, references);
     var timer = setInterval(function() {
       task.run();
     }, config.checkPredecessorTaskInterval);
@@ -29,10 +30,19 @@
         return;
       }
 
-      predecessor.ping(function(error) {
+      predecessor.notifyAsSuccessor(this._localNode, function(successor, error) {
         if (error) {
           console.log(error);
           self._references.removeReference(predecessor);
+          return;
+        }
+
+        if (!successor.equals(self._localNode)) {
+          Utils.debug("[CheckPredecessorTask] Predecessor's successor is not self.");
+
+          self._references.addReferenceAsPredecessor(successor);
+
+          self.run();
           return;
         }
 

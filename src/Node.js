@@ -162,6 +162,29 @@
       });
     },
 
+    notifyAsSuccessor: function(potentialSuccessor, callback) {
+      var self = this;
+
+      this._sendRequest('NOTIFY_AS_SUCCESSOR', {
+        potentialSuccessorNodeInfo: potentialSuccessor.toNodeInfo()
+      }, {
+        success: function(result) {
+          self._nodeFactory.create(result.successorNodeInfo, function(successor, error) {
+            if (error) {
+              callback(null, error);
+              return;
+            }
+
+            callback(successor);
+          });
+        },
+
+        error: function(error) {
+          callback(null, error);
+        }
+      });
+    },
+
     leavesNetwork: function(predecessor) {
       var self = this;
 

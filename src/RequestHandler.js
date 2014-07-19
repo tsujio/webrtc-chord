@@ -12,6 +12,7 @@
       'FIND_SUCCESSOR': this._onFindSuccessor,
       'NOTIFY_AND_COPY': this._onNotifyAndCopy,
       'NOTIFY': this._onNotify,
+      'NOTIFY_AS_SUCCESSOR': this._onNotifyAsSuccessor,
       'PING': this._onPing,
       'INSERT_REPLICAS': this._onInsertReplicas,
       'REMOVE_REPLICAS': this._onRemoveReplicas,
@@ -105,6 +106,30 @@
 
           self._sendSuccessResponse({
             referencesNodeInfo: _.invoke(references, 'toNodeInfo')
+          }, request, callback);
+        });
+      });
+    },
+
+    _onNotifyAsSuccessor: function(request, callback) {
+      var self = this;
+
+      var potentialSuccessorNodeInfo = request.params.potentialSuccessorNodeInfo;
+      this._nodeFactory.create(potentialSuccessorNodeInfo, function(potentialSuccessor, error) {
+        if (error) {
+          console.log(error);
+          self._sendFailureResponse(e.message, request, callback);
+          return;
+        }
+
+        self._localNode.notifyAsSuccessor(potentialSuccessor, function(successor, error) {
+          if (error) {
+            self._sendFailureResponse(e.message, request, callback);
+            return;
+          }
+
+          self._sendSuccessResponse({
+            successorNodeInfo: successor.toNodeInfo()
           }, request, callback);
         });
       });

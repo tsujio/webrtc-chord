@@ -52,7 +52,7 @@
       this._tasks = {
         stabilizeTask: StabilizeTask.create(this, this._references, this._entries, this._config),
         fixFingerTask: FixFingerTask.create(this, this._references, this._config),
-        checkPredecessorTask: CheckPredecessorTask.create(this._references, this._config)
+        checkPredecessorTask: CheckPredecessorTask.create(this, this._references, this._config)
       };
 
       Utils.debug("Created tasks.");
@@ -163,6 +163,7 @@
             });
 
             self._createTasks();
+            self._tasks.checkPredecessorTask.run();
 
             Utils.debug("Joining network succeeded.");
 
@@ -347,6 +348,11 @@
       this._references.addReferenceAsPredecessor(potentialPredecessor);
 
       callback(references);
+    },
+
+    notifyAsSuccessor: function(potentialSuccessor, callback) {
+      this._references.addReference(potentialSuccessor);
+      callback(this._references.getSuccessor());
     },
 
     leavesNetwork: function(predecessor) {

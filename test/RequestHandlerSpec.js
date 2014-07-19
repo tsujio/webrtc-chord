@@ -12,6 +12,7 @@ describe("Node", function() {
       'findSuccessorIterative',
       'notifyAndCopyEntries',
       'notify',
+      'notifyAsSuccessor',
       'insertReplicas',
       'removeReplicas',
       'insertEntryIterative',
@@ -114,6 +115,24 @@ describe("Node", function() {
         expect(response.result.referencesNodeInfo.length).toBe(2);
         expect(response.result.referencesNodeInfo[0].peerId).toBe('dummy1');
         expect(response.result.referencesNodeInfo[1].peerId).toBe('dummy2');
+        done();
+      });
+    });
+  });
+
+  describe("#_onNotifyAsSuccessor", function() {
+    it("should invoke callback with successor", function(done) {
+      localNode.notifyAsSuccessor.andCallFake(function(potentialSuccessor, callback) {
+        expect(potentialSuccessor.getPeerId()).toBe('dummy');
+        nodeFactory.create({peerId: 'successor'}, function(successor) {
+          callback(successor);
+        });
+      });
+      requestHandler.handle(Request.create('NOTIFY_AS_SUCCESSOR', {
+        potentialSuccessorNodeInfo: {peerId: 'dummy'}
+      }), function(response) {
+        expect(response.status).toBe('SUCCESS');
+        expect(response.result.successorNodeInfo.peerId).toBe('successor');
         done();
       });
     });

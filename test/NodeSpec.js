@@ -232,6 +232,42 @@ describe("Node", function() {
     });
   });
 
+  describe("#notifyAsSuccessor", function() {
+    it("should invoke callback with successor when success", function(done) {
+      connection.send.andCallFake(function(request) {
+        expect(request.method).toBe('NOTIFY_AS_SUCCESSOR');
+        connection.ondata(Response.create('SUCCESS', {
+          successorNodeInfo: {peerId: 'dummy1'}
+        }, request).toJson());
+      });
+
+      nodeFactory.create({peerId: 'dummy'}, function(potentialSuccessor) {
+        node.notifyAsSuccessor(potentialSuccessor, function(successor, error) {
+          expect(successor.getPeerId()).toBe('dummy1');
+          expect(error).toBeUndefined();
+          done();
+        });
+      });
+    });
+
+    it("should invoke callback with error when error", function(done) {
+      connection.send.andCallFake(function(request) {
+        expect(request.method).toBe('NOTIFY_AS_SUCCESSOR');
+        connection.ondata(Response.create('FAILED', {
+          successorNodeInfo: {peerId: 'dummy1'}
+        }, request).toJson());
+      });
+
+      nodeFactory.create({peerId: 'dummy'}, function(potentialSuccessor) {
+        node.notifyAsSuccessor(potentialSuccessor, function(successor, error) {
+          expect(successor).toBeNull();
+          expect(error).toEqual(jasmine.any(Error));
+          done();
+        });
+      });
+    });
+  });
+
   describe("#leaveNetwork", function() {
     it("should send request with predecessor node info", function(done) {
       connection.send.andCallFake(function(request) {
