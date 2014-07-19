@@ -120,8 +120,8 @@ describe("Node", function() {
       var i = 0;
       connection.send.andCallFake(function(request) {
         expect(request.method).toBe('FIND_SUCCESSOR');
-        if (i < 3) {
-          i++;
+        i++;
+        if (i % 3 !== 0) {
           connection.ondata(Response.create('REDIRECT', {
             redirectNodeInfo: orderedNodesInfo[i + 2]
           }, request).toJson());
@@ -134,6 +134,7 @@ describe("Node", function() {
 
       node.findSuccessor(ID.create('foo'), function(successor, error) {
         expect(error).toEqual(jasmine.any(Error));
+        expect(i).toBe(6);
         done();
       });
     });

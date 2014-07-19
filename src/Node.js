@@ -13,6 +13,9 @@
     if (!Utils.isZeroOrPositiveNumber(config.requestTimeout)) {
       config.requestTimeout = 180000;
     }
+    if (!Utils.isZeroOrPositiveNumber(config.maxRoundCount)) {
+      config.maxRoundCount = 1;
+    }
 
     this._peerId = nodeInfo.peerId;
     this.nodeId = ID.create(nodeInfo.peerId);
@@ -42,34 +45,62 @@
         return;
       }
 
+      var roundCount = 0;
+      (function _findSuccessor(node) {
+        node.findSuccessorIterative(key, function(status, successor, error) {
+          if (status === 'SUCCESS') {
+            callback(successor);
+          } else if (status === 'REDIRECT') {
+            if (self.nodeId.isInInterval(node.nodeId, successor.nodeId)) {
+              roundCount++;
+              if (roundCount > self._config.maxRoundCount) {
+                callback(null, new Error("FIND_SUCCESSOR request circulates in the network."));
+                return;
+              }
+            }
+
+            Utils.debug("[findSuccessor] redirected to " + successor.getPeerId());
+
+            _findSuccessor(successor);
+          } else if (status === 'FAILED') {
+            callback(null, error);
+          } else {
+            callback(null, new Error("Got unknown status:", status));
+          }
+        });
+      })(this);
+    },
+
+    findSuccessorIterative: function(key, callback) {
+      var self = this;
+
       this._sendRequest('FIND_SUCCESSOR', {
         key: key.toHexString()
       }, {
         success: function(result) {
           var nodeInfo = result.successorNodeInfo;
-          self._nodeFactory.create(nodeInfo, callback);
+          self._nodeFactory.create(nodeInfo, function(successor, error) {
+            if (error) {
+              callback('FAILED', null, error);
+              return;
+            }
+            callback('SUCCESS', successor);
+          });
         },
 
         redirect: function(result) {
           self._nodeFactory.create(result.redirectNodeInfo, function(nextNode, error) {
             if (error) {
-              callback(null, error);
+              callback('FAILED', null, error);
               return;
             }
 
-            if (self._localId.isInInterval(self.nodeId, nextNode.nodeId)) {
-              callback(null, new Error("FIND_SUCCESSOR request circulates in the network."));
-              return;
-            }
-
-            Utils.debug("[findSuccessor] redirected to " + nextNode.getPeerId());
-
-            nextNode.findSuccessor(key, callback);
+            callback('REDIRECT', nextNode);
           });
         },
 
         error: function(error) {
-          callback(null, error);
+          callback('FAILED', null, error);
         }
       });
     },
