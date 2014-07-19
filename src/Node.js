@@ -366,7 +366,7 @@
 
         Utils.debug("Sending request to", self._peerId, ":", request.method);
 
-        connection.send(request);
+        connection.send(request.toJson());
       });
     },
 
@@ -386,7 +386,7 @@
 
           Utils.debug("Sending response to", self._peerId, ":", response.method);
 
-          connection.send(response);
+          connection.send(response.toJson());
         });
       });
     },
