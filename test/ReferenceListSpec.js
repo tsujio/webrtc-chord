@@ -13,18 +13,22 @@
     beforeEach(function() {
       var localId = ID.fromHexString("0000000000000000000000000000000000000000000000000000000000000000");
       var entries = jasmine.createSpyObj('entries', ['getEntriesInInterval']);
-      successors = jasmine.createSpyObj('successors', [
-        'addSuccessor', 'removeReference', 'getClosestPrecedingNode'
-      ]);
-      fingerTable = jasmine.createSpyObj('fingerTable', [
-        'addReference', 'removeReference', 'getClosestPrecedingNode'
-      ]);
       references = new ReferenceList(localId, entries, {});
-      references._successors = successors;
-      references._fingerTable = fingerTable;
+      successors = references._successors;
+      fingerTable = references._fingerTable;
+
+      spyOn(successors, 'addSuccessor');
+      successors.addSuccessor.andCallThrough();
+      spyOn(successors, 'removeReference');
+
+      spyOn(fingerTable, 'addReference');
+      fingerTable.addReference.andCallThrough();
+      spyOn(fingerTable, 'removeReference');
 
       nodes = _(4).times(function() {
-        return new Node({peerId: "dummy", nodeId: "dummy"}, null, null, null, null, {});
+        var node = jasmine.createSpyObj('node', ['disconnect', 'insertReplicas', 'removeReplicas', 'equals']);
+        node.equals.andCallFake(function(n) { return !n ? false : node.nodeId.equals(n.nodeId); });
+        return node;
       }).value();
       nodes[0].nodeId = ID.fromHexString("00000000000000000000000000000000ffffffffffffffffffffffffffffffff");
       nodes[1].nodeId = ID.fromHexString("0000000000000000ffffffffffffffffffffffffffffffff0000000000000000");
@@ -77,15 +81,16 @@
 
     describe("#getClosestPrecedingNode", function() {
       it("should return closest preceding node", function() {
-        references._successors.getClosestPrecedingNode.andReturn(nodes[0]);
-        references._fingerTable.getClosestPrecedingNode.andReturn(nodes[1]);
         references._predecessor = nodes[2];
         expect(references.getClosestPrecedingNode(
           ID.fromHexString("0000000000000000000000000000000000000000000000000000000000000000")))
           .toBeNull();
         expect(references.getClosestPrecedingNode(
+          ID.fromHexString("0000000000000000000000000000000000000000000000000000000000000001")))
+          .toBeNull();
+        expect(references.getClosestPrecedingNode(
           ID.fromHexString("00000000000000000000000000000000fffffffffffffffffffffffffffffffe")))
-          .toEqualNode(nodes[1]);
+          .toBeNull();
         expect(references.getClosestPrecedingNode(
           ID.fromHexString("00000000000000000000000000000000ffffffffffffffffffffffffffffffff")))
           .toEqualNode(nodes[0]);
@@ -107,6 +112,9 @@
         expect(references.getClosestPrecedingNode(
           ID.fromHexString("ffffffffffffffffffffffffffffffff00000000000000000000000000000000")))
           .toEqualNode(nodes[1]);
+        expect(references.getClosestPrecedingNode(
+          ID.fromHexString("ffffffffffffffffffffffffffffffff00000000000000000000000000000001")))
+          .toEqualNode(nodes[2]);
         expect(references.getClosestPrecedingNode(
           ID.fromHexString("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")))
           .toEqualNode(nodes[2]);
