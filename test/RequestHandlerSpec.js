@@ -19,8 +19,7 @@ describe("Node", function() {
       'removeEntryIterative',
       'leavesNetwork',
     ]);
-    localNode.nodeId = jasmine.createSpyObj('nodeId', ['equals']);
-    localNode.nodeId.equals.andReturn(false);
+    localNode.nodeId = ID.create('localid');
     nodeFactory = new NodeFactory(localNode, {});
     requestHandler = new RequestHandler(localNode, nodeFactory);
   });

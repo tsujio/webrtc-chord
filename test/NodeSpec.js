@@ -22,14 +22,14 @@ describe("Node", function() {
     });
 
     localNode = jasmine.createSpy('localNode');
-    localNode.nodeId = jasmine.createSpyObj('nodeId', ['equals']);
-    localNode.nodeId.equals.andReturn(false);
+    localNode.nodeId = orderedNodesInfo[0].nodeId;
     nodeFactory = new NodeFactory(localNode, {});
     nodeFactory._connectionFactory = connectionFactory;
 
     requestHandler = jasmine.createSpyObj('requestHandler', ['handle']);
 
-    node = new Node({peerId: 'dummyid'}, nodeFactory, connectionFactory, requestHandler, {});
+    node = new Node(orderedNodesInfo[1], orderedNodesInfo[0].nodeId, nodeFactory, connectionFactory,
+                    requestHandler, {});
   });
 
   describe("#isValidNodeInfo", function() {
@@ -64,17 +64,17 @@ describe("Node", function() {
         if (i < 3) {
           i++;
           connection.ondata(Response.create('REDIRECT', {
-            redirectNodeInfo: {peerId: 'dummy' + i}
+            redirectNodeInfo: orderedNodesInfo[i + 2]
           }, request).toJson());
         } else {
           connection.ondata(Response.create('SUCCESS', {
-            successorNodeInfo: {peerId: 'dummy' + i}
+            successorNodeInfo: orderedNodesInfo[i + 2]
           }, request).toJson());
         }
       });
 
       node.findSuccessor(ID.create('foo'), function(successor, error) {
-        expect(successor.getPeerId()).toBe('dummy3');
+        expect(successor.getPeerId()).toBe(orderedNodesInfo[5].peerId);
         expect(error).toBeUndefined();
         done();
       });
@@ -101,11 +101,33 @@ describe("Node", function() {
         if (i < 3) {
           i++;
           connection.ondata(Response.create('REDIRECT', {
-            redirectNodeInfo: {peerId: 'dummy' + i}
+            redirectNodeInfo: orderedNodesInfo[i + 2]
           }, request).toJson());
         } else {
           connection.ondata(Response.create('FAILED', {
-            successorNodeInfo: {peerId: 'dummy' + i}
+            successorNodeInfo: orderedNodesInfo[i + 2]
+          }, request).toJson());
+        }
+      });
+
+      node.findSuccessor(ID.create('foo'), function(successor, error) {
+        expect(error).toEqual(jasmine.any(Error));
+        done();
+      });
+    });
+
+    it("should invoke callback with error when request circulates in the network", function(done) {
+      var i = 0;
+      connection.send.andCallFake(function(request) {
+        expect(request.method).toBe('FIND_SUCCESSOR');
+        if (i < 3) {
+          i++;
+          connection.ondata(Response.create('REDIRECT', {
+            redirectNodeInfo: orderedNodesInfo[i + 2]
+          }, request).toJson());
+        } else {
+          connection.ondata(Response.create('REDIRECT', {
+            redirectNodeInfo: orderedNodesInfo[i]
           }, request).toJson());
         }
       });

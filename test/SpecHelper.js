@@ -1,5 +1,7 @@
 var fse = require('fs-extra');
 var path = require('path');
+var _ = require('lodash');
+var ID = require('../src/ID');
 
 beforeEach(function () {
   this.addMatchers({
@@ -38,6 +40,15 @@ var helpers = {
       fse.removeSync(path.join(__dirname, '../node_modules/connectionpool'));
     }
   },
+
+  orderedNodesInfo: (function() {
+    var nodesInfo = _.times(256, function(i) {
+      var peerId = 'localid' + (i === 0 ? '' : ('+' + i));
+      return {peerId: peerId, nodeId: ID.create(peerId)};
+    });
+    nodesInfo.sort(function(a, b) { return a.nodeId.compareTo(b.nodeId); });
+    return nodesInfo;
+  })()
 };
 
 module.exports = helpers;

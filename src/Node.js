@@ -5,7 +5,7 @@
   var Entry = require('./Entry');
   var Utils = require('./Utils');
 
-  var Node = function(nodeInfo, nodeFactory, connectionFactory, requestHandler, config) {
+  var Node = function(nodeInfo, localId, nodeFactory, connectionFactory, requestHandler, config) {
     if (!Node.isValidNodeInfo(nodeInfo)) {
       throw new Error("Invalid arguments.");
     }
@@ -16,6 +16,7 @@
 
     this._peerId = nodeInfo.peerId;
     this.nodeId = ID.create(nodeInfo.peerId);
+    this._localId = localId;
     this._nodeFactory = nodeFactory;
     this._connectionFactory = connectionFactory;
     this._requestHandler = requestHandler;
@@ -50,15 +51,20 @@
         },
 
         redirect: function(result) {
-          self._nodeFactory.create(result.redirectNodeInfo, function(node, error) {
+          self._nodeFactory.create(result.redirectNodeInfo, function(nextNode, error) {
             if (error) {
               callback(null, error);
               return;
             }
 
-            Utils.debug("[findSuccessor] redirected to " + node.getPeerId());
+            if (self._localId.isInInterval(self.nodeId, nextNode.nodeId)) {
+              callback(null, new Error("FIND_SUCCESSOR request circulates in the network."));
+              return;
+            }
 
-            node.findSuccessor(key, callback);
+            Utils.debug("[findSuccessor] redirected to " + nextNode.getPeerId());
+
+            nextNode.findSuccessor(key, callback);
           });
         },
 

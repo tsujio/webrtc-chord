@@ -61,7 +61,8 @@
         return;
       }
 
-      var node = new Node(nodeInfo, this, this._connectionFactory, this._requestHandler, this._config);
+      var node = new Node(nodeInfo, this._localNode.nodeId, this, this._connectionFactory,
+                          this._requestHandler, this._config);
 
       callback(node);
     },

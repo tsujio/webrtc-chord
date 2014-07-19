@@ -15,7 +15,7 @@
       fingerTable = new FingerTable(localId, references);
 
       entries = _(2).times(function() {
-        return new Node({peerId: "dummy", nodeId: "dummy"}, null, null, null, {});
+        return new Node({peerId: "dummy", nodeId: "dummy"}, null, null, null, null, {});
       }).value();
       entries[0].nodeId = ID.fromHexString("00000000000000000000000000000000ffffffffffffffffffffffffffffffff");
       entries[1].nodeId = ID.fromHexString("0000000000000000ffffffffffffffffffffffffffffffff0000000000000000");

@@ -1,7 +1,8 @@
-var ConnectionFactory, NodeFactory;
+var ConnectionFactory, NodeFactory, ID;
 replaceConnectionPool(function() {
   ConnectionFactory = require('connectionpool');
   NodeFactory = require('../src/NodeFactory');
+  ID = require('../src/ID');
 });
 
 describe("NodeFactory", function() {
@@ -10,8 +11,7 @@ describe("NodeFactory", function() {
 
   beforeEach(function() {
     localNode = jasmine.createSpy('localNode');
-    localNode.nodeId = jasmine.createSpyObj('nodeId', ['equals']);
-    localNode.nodeId.equals.andReturn(false);
+    localNode.nodeId = ID.create('localid');
     nodeFactory = new NodeFactory(localNode, {});
     nodeFactory._connectionFactory = new ConnectionFactory();
   });
@@ -32,7 +32,6 @@ describe("NodeFactory", function() {
     });
 
     it("should return local node if passed local node info", function(done) {
-      localNode.nodeId.equals.andReturn(true);
       nodeFactory.create({peerId: 'localid'}, function(node, error) {
         expect(node).toBe(localNode);
         done();

@@ -23,7 +23,7 @@
       });
 
       entries = _(3).times(function() {
-        var node = new Node({peerId: "dummy", nodeId: "dummy"}, null, null, null, {});
+        var node = new Node({peerId: "dummy", nodeId: "dummy"}, null, null, null, null, {});
         spyOn(node, 'insertReplicas');
         spyOn(node, 'removeReplicas');
         return node;
