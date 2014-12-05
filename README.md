@@ -33,6 +33,7 @@ to adjust some proxy settings to access to them.
 ## Build
 ```sh
 cd webrtc-chord
+git submodule init && git submodule update
 npm install
 npm run-script build
 ```
